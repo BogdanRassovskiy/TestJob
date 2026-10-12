@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VOO a SPY z Česka nekoupíte. Tady jsou jejich evropská dvojčata</title>
+<meta name="description" content="Srovnání 6 nejoblíbenějších ETF z NYSE a jejich UCITS náhrad, které si jako Čech koupíte. S kalkulačkou poplatků. Data s ověřenými zdroji.">
+<meta property="og:title" content="VOO a SPY z Česka nekoupíte. Jejich evropská dvojčata ano.">
+<meta property="og:description" content="6 ETF z NYSE, jejich UCITS náhrady a kolik vás stojí poplatky. Zdarma.">
+<meta name="theme-color" content="#12233d">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2312233d'/><path d='M7 22l6-6 4 4 8-9' stroke='%2334d399' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header class="top">
+  <span class="logo">ETF<b>mapa</b>.cz</span>
+  <span class="top-date">data k <span data-date></span></span>
+</header>
+
+<main id="sections">
+
+  <!-- HERO: text se přepíná podle varianty reklamy (?v=a | ?v=b) -->
+  <section class="hero" data-section="hero">
+    <p class="eyebrow" data-variant-text="eyebrow"></p>
+    <h1 data-variant-text="h1"></h1>
+    <p class="lead" data-variant-text="lead"></p>
+
+    <div class="hero-proof" data-variant-show="a">
+      <div class="pair-mini">
+        <div class="pm-side pm-us">
+          <span class="pm-ticker">VOO</span>
+          <span class="pm-tag pm-no">z ČR nekoupíte</span>
+        </div>
+        <span class="pm-arrow" aria-hidden="true">→</span>
+        <div class="pm-side pm-eu">
+          <span class="pm-ticker">VUAA</span>
+          <span class="pm-tag pm-yes">koupíte u běžného brokera</span>
+        </div>
+      </div>
+      <p class="pm-caption">Stejný index S&P 500 · poplatek 0,07 % ročně</p>
+    </div>
+
+    <div class="hero-proof" data-variant-show="b">
+      <div class="big-diff">
+        <span class="bd-label">Rozdíl na poplatcích za 20 let</span>
+        <span class="bd-value" data-hero-diff></span>
+        <span class="bd-sub">při 3 000 Kč měsíčně · bankovní fond 2 % vs. ETF 0,07 %</span>
+      </div>
+    </div>
+
+
+    <a href="#" class="btn btn-primary" data-variant-cta data-track="hero_cta"></a>
+    <p class="micro">Nic neprodáváme, nejsme broker. Zdroje dat najdete u každého čísla.</p>
+    <ul class="you-get hero-get">
+      <li><b>Srovnání 6 ETF z NYSE</b> a jejich UCITS náhrad dostupných v ČR</li>
+      <li><b>Kalkulačka</b>, kolik vás stojí poplatky za 10–30 let</li>
+      <li><b>Návod v 5 krocích</b>, jak koupit první ETF (zdarma na e-mail)</li>
+    </ul>
+  </section>
+
+  <!-- SROVNÁNÍ -->
+  <section class="block" id="srovnani" data-section="table">
+    <h2>Co koupit místo amerických ETF</h2>
+    <p class="sub">Nahoře ETF z newyorské burzy, pod ním jeho evropská verze (UCITS), kterou vám český broker prodá.</p>
+    <div class="pairs" data-pairs></div>
+    <div class="lock" data-lock>
+      <p class="lock-title"><span aria-hidden="true">🔒</span> Další 4 dvojice: IVV, VT, VTI, SCHD</p>
+      <p class="lock-text">Včetně celosvětového VWCE a dividendové náhrady za SCHD. Odemkneme hned po zadání e-mailu.</p>
+      <a href="#ziskat" class="btn btn-secondary" data-track="unlock_click">Odemknout celé srovnání</a>
+    </div>
+  </section>
+
+  <!-- KALKULAČKA -->
+  <section class="block calc" id="kalkulacka" data-section="calc">
+    <h2>Kolik vás stojí poplatky</h2>
+    <p class="sub">Vyberte, kolik měsíčně investujete a jak dlouho.</p>
+
+    <fieldset class="chips" data-calc="monthly">
+      <legend>Měsíčně</legend>
+      <button type="button" data-val="1000">1 000 Kč</button>
+      <button type="button" data-val="3000" class="on">3 000 Kč</button>
+      <button type="button" data-val="5000">5 000 Kč</button>
+      <button type="button" data-val="10000">10 000 Kč</button>
+    </fieldset>
+
+    <fieldset class="chips" data-calc="years">
+      <legend>Doba</legend>
+      <button type="button" data-val="10">10 let</button>
+      <button type="button" data-val="20" class="on">20 let</button>
+      <button type="button" data-val="30">30 let</button>
+    </fieldset>
+
+    <fieldset class="chips" data-calc="fee">
+      <legend>Srovnat s fondem, který si účtuje ročně</legend>
+      <button type="button" data-val="2" class="on">2 % (bankovní fond)</button>
+      <button type="button" data-val="1.5">1,5 %</button>
+      <button type="button" data-val="1">1 %</button>
+    </fieldset>
+
+    <div class="result" aria-live="polite">
+      <div class="res-row">
+        <span>Fond s poplatkem <span data-out="feeLabel"></span></span>
+        <b data-out="fvFund"></b>
+      </div>
+      <div class="res-row res-etf">
+        <span>ETF s poplatkem 0,07 %</span>
+        <b data-out="fvEtf"></b>
+      </div>
+      <div class="res-diff">
+        <span>Na poplatcích ušetříte</span>
+        <b data-out="diff"></b>
+      </div>
+      <p class="res-note">Vloženo celkem <span data-out="paid"></span>. Předpoklad: výnos 7 % ročně před poplatky. Nejde o slib výnosu, slouží jen ke srovnání nákladů. Nezahrnuje vstupní poplatky fondů (až 3 %) ani poplatky brokera.</p>
+    </div>
+    <a href="#ziskat" class="btn btn-primary" data-track="calc_cta">Poslat mi výpočet a celé srovnání</a>
+  </section>
+
+  <!-- FORMULÁŘ -->
+  <section class="block form-block" id="ziskat" data-section="form">
+    <div data-form-wrap>
+      <h2>Celé srovnání + návod na první nákup</h2>
+      <ul class="you-get compact">
+        <li>Všech 6 dvojic ETF s tickery, ISIN a poplatky</li>
+        <li>Váš výpočet: <b data-out="summary"></b></li>
+        <li>Návod: první ETF u brokera v 5 krocích</li>
+      </ul>
+      <form data-lead-form novalidate>
+        <label for="email" class="sr-only">Váš e-mail</label>
+        <input id="email" name="email" type="email" inputmode="email" autocomplete="email"
+               placeholder="vas@email.cz" required>
+        <input type="text" name="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button type="submit" class="btn btn-primary">Odemknout a poslat na e-mail</button>
+        <p class="form-err" data-form-err hidden></p>
+        <p class="micro">Srovnání se odemkne hned na stránce. Pak max. 1 tip měsíčně, odhlásit se můžete kdykoli. <a href="/zasady.html">Zásady ochrany údajů</a></p>
+      </form>
+    </div>
+
+    <!-- PO ODESLÁNÍ -->
+    <div class="thanks" data-thanks hidden>
+      <p class="thanks-badge">✓ Odemčeno</p>
+      <h2>Hotovo. Celé srovnání je výše na stránce</h2>
+      <p>Kopie míří na <b data-out="email"></b>. Mezitím tady je návod:</p>
+      <ol class="steps">
+        <li><b>Vyberte brokera</b>, který nabízí ETF z evropských burz (např. Xetra). V ČR jsou běžné třeba XTB, Trading 212, Interactive Brokers nebo Fio e-Broker. Porovnejte jejich poplatky za nákup a směnu měny.</li>
+        <li><b>Hledejte podle ISIN</b>, ne podle názvu. Např. VUAA = <code>IE00BFMXXD54</code>. Vyhnete se záměně.</li>
+        <li><b>Zvolte akumulační verzi (Acc)</b>, pokud nechcete řešit dividendy v daňovém přiznání.</li>
+        <li><b>Nastavte pravidelnou investici</b>, třeba 3 000 Kč měsíčně. Pravidelnost je důležitější než načasování.</li>
+        <li><b>Držte alespoň 3 roky.</b> Zisk z prodeje cenných papírů držených déle než 3 roky je v ČR obvykle osvobozen od daně (časový test). Detaily ověřte u daňového poradce.</li>
+      </ol>
+      <a href="#srovnani" class="btn btn-secondary" data-track="thanks_to_table">Zobrazit celé srovnání</a>
+    </div>
+  </section>
+
+  <!-- PROČ -->
+  <section class="block faq" data-section="faq">
+    <h2>Časté otázky</h2>
+    <details>
+      <summary>Proč nemůžu koupit VOO nebo SPY?</summary>
+      <p>Od roku 2018 platí v EU nařízení PRIIPs: fond prodávaný drobným investorům musí mít dokument KID v jazyce země. Americké ETF ho nevydávají, takže je vám evropský broker jako drobnému investorovi neprodá. Evropské fondy UCITS ho mají.</p>
+    </details>
+    <details>
+      <summary>Je evropská verze horší?</summary>
+      <p>Sleduje stejný index a drží stejné akcie. Poplatek bývá o pár setin procenta vyšší (VUAA 0,07 % vs. VOO 0,03 %), u SPYL je naopak nižší. Rozdíl ve výnosu je proto zanedbatelný.</p>
+    </details>
+    <details>
+      <summary>Co je akumulační a distribuční ETF?</summary>
+      <p>Akumulační (Acc) dividendy automaticky reinvestuje, nic nedostanete na účet a nic nedaníte průběžně. Distribuční (Dist) vyplácí dividendy, které musíte uvést v daňovém přiznání.</p>
+    </details>
+    <details>
+      <summary>Kdo za stránkou stojí a co budete dělat s e-mailem?</summary>
+      <p>Jsme nezávislý vzdělávací projekt, nejsme broker ani poradce. E-mail použijeme jen k zaslání srovnání a občasných tipů. Žádné předávání třetím stranám.</p>
+    </details>
+  </section>
+
+  <section class="block sources" data-section="sources">
+    <h2>Zdroje dat</h2>
+    <p>Data ověřena <span data-date></span>. Americké ETF: <a href="https://stockanalysis.com/etf/" rel="noopener">stockanalysis.com</a>, evropské ETF: <a href="https://www.justetf.com/cz/" rel="noopener">justETF</a>, poplatky bankovního fondu: příklad Erste Top Stocks, TER 2,17 % (<a data-fee-src rel="noopener">finex.cz</a>). Regulace PRIIPs: <a href="https://eur-lex.europa.eu/legal-content/CS/TXT/?uri=CELEX:32014R1286" rel="noopener">nařízení (EU) č. 1286/2014</a>.</p>
+    <p class="disclaimer">Obsah je pouze informativní a není investičním doporučením. Investice nesou riziko, hodnota může klesat i stoupat a minulé výnosy nezaručují budoucí.</p>
+  </section>
+</main>
+
+<div class="sticky" data-sticky hidden>
+  <a href="#ziskat" class="btn btn-primary" data-track="sticky_cta">Získat celé srovnání zdarma</a>
+</div>
+
+<footer class="foot">
+  <p>ETFmapa.cz · <a href="/zasady.html">Zásady ochrany údajů</a></p>
+</footer>
+
+<script src="/data.js"></script>
+<script src="/config.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

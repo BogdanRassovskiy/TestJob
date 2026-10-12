@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "api/lead.js": { "includeFiles": "public/data.js" }
+  },
+  "headers": [
+    { "source": "/(.*)\\.(js|css)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600" }] }
+  ]
+}
