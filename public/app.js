@@ -18,6 +18,11 @@
   // ---------- Měření ----------
   // Každá událost: název, varianta, ms od načtení. window.__events čte i scripts/measure.mjs.
   window.__events = [];
+  // Kroky funnelu, které se počítají i na serveru (admin stránka). Každý max. jednou za návštěvu.
+  var FUNNEL = { lp_view: 1, hero_cta: 1, 'section_view:table': 1, 'section_view:calc': 1, 'section_view:form': 1,
+    calc_interact: 1, unlock_click: 1, calc_cta: 1, sticky_cta: 1, form_focus: 1, form_submit: 1, form_error: 1,
+    lead_success: 1, lead_fail: 1 };
+  var sent = {};
   var cfg = window.APP_CONFIG || {};
   if (cfg.posthogKey) loadPosthog(cfg.posthogKey, cfg.posthogHost);
 
@@ -25,6 +30,14 @@
     var p = Object.assign({ variant: variant, t_ms: Math.round(performance.now() - T0) }, props || {});
     window.__events.push({ event: name, props: p });
     if (window.posthog && window.posthog.capture) window.posthog.capture(name, p);
+    var key = name === 'section_view' ? name + ':' + p.section : name;
+    if (FUNNEL[key] && !sent[key]) {
+      sent[key] = true;
+      var payload = JSON.stringify({ event: key, variant: variant });
+      if (!(navigator.sendBeacon && navigator.sendBeacon('/api/track', payload))) {
+        fetch('/api/track', { method: 'POST', body: payload, keepalive: true }).catch(function () {});
+      }
+    }
     if (location.hostname === 'localhost') console.debug('[track]', name, p);
   }
 
@@ -139,7 +152,7 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     var email = input.value.trim().toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(email)) {
+    if (!/^[^\s@<>"']+@[^\s@<>"']+\.[a-z]{2,}$/.test(email)) {
       track('form_error', { reason: 'invalid' });
       return showErr('Zkontrolujte prosím e-mail, něco v něm chybí.');
     }

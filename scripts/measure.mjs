@@ -23,6 +23,7 @@ async function run(variant) {
   // Nepovolíme skutečné odeslání do produkčního úložiště, pokud měříme cizí URL.
   if (!BASE.includes('localhost')) {
     await page.route('**/api/lead', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+    await page.route('**/api/track', (r) => r.fulfill({ status: 204 })); // nezkreslovat produkční funnel
   }
 
   const steps = [];

@@ -1,8 +1,11 @@
 // POST /api/lead: uloží kontakt a pošle srovnání e-mailem.
-// Env proměnné (vše volitelné, viz README):
-//   LEAD_WEBHOOK_URL: kam poslat lead jako JSON (např. Google Apps Script → Google Sheet)
+// Env proměnné (viz README):
+//   KV_REST_API_URL + KV_REST_API_TOKEN: Upstash Redis, hlavní úložiště leadů (zobrazuje /admin.html)
+//   LEAD_WEBHOOK_URL: volitelně kopie leadu jako JSON jinam (CRM, Google Sheet…)
 //   RESEND_API_KEY + MAIL_FROM: odeslání e-mailu se srovnáním přes resend.com
 const fs = require('fs');
+const crypto = require('crypto');
+const redis = require('./_redis');
 const path = require('path');
 const vm = require('vm');
 
@@ -61,11 +64,12 @@ module.exports = async (req, res) => {
 
   // Honeypot: boti vyplní skryté pole. Vracíme OK, aby nepoznali, že byli odhaleni.
   if (body.company) return res.status(200).json({ ok: true });
-  if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(email) || email.length > 200) {
+  if (!/^[^\s@<>"']+@[^\s@<>"']+\.[a-z]{2,}$/.test(email) || email.length > 200) {
     return res.status(400).json({ ok: false, error: 'invalid_email' });
   }
 
   const lead = {
+    id: crypto.randomUUID(),
     email,
     variant: String(body.variant || '').slice(0, 4),
     utm: body.utm || {},
@@ -75,6 +79,17 @@ module.exports = async (req, res) => {
     ua: String(req.headers['user-agent'] || '').slice(0, 300),
     created_at: new Date().toISOString()
   };
+
+  // Uložení leadu je kritické: když selže, vrátíme chybu a uživatel zkusí znovu.
+  if (redis.enabled) {
+    const raw = JSON.stringify(lead);
+    try {
+      await redis.pipeline([['LPUSH', 'leads', raw], ['HSET', 'lead_by_id', lead.id, raw]]);
+    } catch (e) {
+      console.error('lead store failed', String(e));
+      return res.status(502).json({ ok: false, error: 'store_failed' });
+    }
+  }
 
   const tasks = [];
   if (process.env.LEAD_WEBHOOK_URL) {
@@ -94,16 +109,12 @@ module.exports = async (req, res) => {
       })
     }).then((r) => { if (!r.ok) throw new Error('resend ' + r.status); }));
   }
-  if (!tasks.length) console.warn('lead: LEAD_WEBHOOK_URL ani RESEND_API_KEY nejsou nastaveny, lead jen v logu');
+  if (!redis.enabled) console.warn('lead: Redis není nastaven, lead je jen v logu');
 
   const results = await Promise.allSettled(tasks);
   const failed = results.filter((r) => r.status === 'rejected').map((r) => String(r.reason));
   console.log(JSON.stringify({ type: 'lead', variant: lead.variant, utm: lead.utm, time_to_lead_ms: lead.time_to_lead_ms, failed }));
 
-  // Uložení leadu je kritické. Pokud selže webhook, vrátíme chybu, aby uživatel zkusil znovu.
-  if (process.env.LEAD_WEBHOOK_URL && results[0].status === 'rejected') {
-    return res.status(502).json({ ok: false, error: 'store_failed' });
-  }
   return res.status(200).json({ ok: true });
 };
 
