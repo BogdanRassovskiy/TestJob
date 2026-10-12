@@ -1,6 +1,6 @@
 # ETFmapa.cz: лендинг-лидмагнит «ETF с NYSE для чешского инвестора»
 
-**Сайт:** `https://<проект>.vercel.app` (вариант объявления A: `/?v=a`, вариант B: `/?v=b`)
+**Сайт:** https://etf-landing-flax.vercel.app (вариант объявления A: `/?v=a`, вариант B: `/?v=b`)
 **Стек:** статический HTML/CSS/vanilla JS (36 КБ на первую загрузку) + одна serverless-функция `api/lead.js` на Vercel.
 
 ```
