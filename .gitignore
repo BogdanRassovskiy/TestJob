@@ -2,3 +2,6 @@ node_modules
 .vercel
 .env*
 measure-output/
+.agents/
+.claude/
+skills-lock.json
