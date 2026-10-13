@@ -192,10 +192,10 @@ Stránka se zásadami ochrany osobních údajů je hotová, jen místo správce 
 
 Doplnění zabere pár minut: stačí v `public/zasady.html` nahradit jeden řádek údaji provozovatele. Je to první bod v seznamu níže.
 
-## 11. Co není hotové a co je potřeba před spuštěním reklamy
+## 11. Co by bylo potřeba pro skutečné spuštění
 
-Podle priority:
-1. **Údaje provozovatele v `zasady.html`** (viz oddíl 10). Bez nich Meta/Google reklamu zamítnou.
+Kritérium „mohla by na ni zítra běžet reklama“ chápu jako měřítko kvality: je stránka dost přesvědčivá, aby se na ni vyplatilo posílat placený provoz? Na to odpovídají oddíly 1–8. Níže jsou spíš provozní kroky, které by následovaly po rozhodnutí kampaň opravdu spustit. Podle priority:
+1. **Údaje provozovatele v `zasady.html`** (viz oddíl 10). Reklamní systémy je vyžadují.
 2. **Před skutečným provozem změnit heslo administrace** na dlouhé náhodné (`vercel env`).
 3. **Meta pixel / Conversions API nejsou připojené.** Bez nich Meta nemůže optimalizovat kampaň na leady (spustit ji ale jde, např. s optimalizací na zobrazení stránky). Doporučuji serverové CAPI z `api/lead.js`, které nepotřebuje cookie lištu.
 4. **E-mail s výsledkem** (volitelně): ověřit doménu v Resend, nastavit `RESEND_API_KEY` + `MAIL_FROM` a vrátit do textu slib e-mailu. Kód je připravený.
