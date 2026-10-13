@@ -170,6 +170,10 @@
     kpi('Konverze celkem', pct(leadsInRange.length, visits), 'leady / návštěvy');
     kpi('Konverze A', pct(t.a.lead_success || 0, t.a.lp_view || 0), nf.format(t.a.lead_success || 0) + ' leadů');
     kpi('Konverze B', pct(t.b.lead_success || 0, t.b.lp_view || 0), nf.format(t.b.lead_success || 0) + ' leadů');
+    var byCta = {};
+    leadsInRange.forEach(function (l) { var k = CTA_NAMES[l.cta] || 'bez tlačítka (scroll)'; byCta[k] = (byCta[k] || 0) + 1; });
+    var top = Object.keys(byCta).sort(function (x, y) { return byCta[y] - byCta[x]; })[0];
+    kpi('Leady s kalkulačkou', pct(leadsInRange.filter(function (l) { return l.calc; }).length, leadsInRange.length), 'nejčastější tlačítko: ' + (top || '–'));
 
     // Funnel
     var max = Math.max(t.a.lp_view || 0, t.b.lp_view || 0, 1);
@@ -201,18 +205,20 @@
     if (!q) return list;
     return list.filter(function (l) { return JSON.stringify([l.email, l.utm, l.variant]).toLowerCase().indexOf(q) >= 0; });
   }
-  function calcText(c) { return c ? nf.format(c.monthly) + ' Kč × ' + c.years + ' let, fond ' + c.fee + ' %' : '–'; }
+  function calcText(c) { return c ? nf.format(c.monthly) + ' Kč × ' + c.years + ' let, fond ' + c.fee + ' %' : 'nepoužil'; }
+  var CTA_NAMES = { hero_cta: 'první obrazovka', unlock_click: 'zamčené srovnání', calc_cta: 'pod kalkulačkou', sticky_cta: 'lepicí tlačítko' };
 
   function renderLeads(list) {
     var rows = filtered(list);
     $('leadCount').textContent = '(' + rows.length + ')';
-    fill($('leads'), [['Datum'], ['E-mail'], ['Var.'], ['Zdroj / kampaň'], ['Výpočet'], ['Čas do leadu', 'num'], ['']], rows.map(function (l) {
+    fill($('leads'), [['Datum'], ['E-mail'], ['Var.'], ['Zdroj / kampaň'], ['Přes tlačítko'], ['Kalkulačka'], ['Čas do leadu', 'num'], ['']], rows.map(function (l) {
       var u = l.utm || {};
       return el('tr', {}, [
         el('td', { text: dt(l.created_at) }),
         el('td', {}, [el('b', { text: l.email })]),
         el('td', {}, [el('span', { class: 'tag ' + (l.variant === 'b' ? 'b' : 'a'), text: (l.variant || 'a').toUpperCase() })]),
         el('td', { text: [u.utm_source, u.utm_campaign].filter(Boolean).join(' / ') || 'přímo' }),
+        el('td', { text: CTA_NAMES[l.cta] || 'bez tlačítka (scroll)' }),
         el('td', { text: calcText(l.calc) }),
         el('td', { class: 'num', text: l.time_to_lead_ms ? Math.round(l.time_to_lead_ms / 1000) + ' s' : '–' }),
         el('td', {}, [el('button', { class: 'danger', text: 'Smazat', title: 'Výmaz na žádost (GDPR)', onclick: function () { del(l); } })])
@@ -229,10 +235,10 @@
     var since = new Date(Date.now() - ($('days').value - 1) * 864e5).toISOString().slice(0, 10);
     var rows = filtered(data.leads.filter(function (l) { return l.created_at.slice(0, 10) >= since; }));
     var q = function (v) { v = v == null ? '' : String(v); return /[";,\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
-    var lines = [['created_at', 'email', 'variant', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'monthly', 'years', 'fee', 'time_to_lead_s'].join(';')];
+    var lines = [['created_at', 'email', 'variant', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'cta', 'monthly', 'years', 'fee', 'time_to_lead_s'].join(';')];
     rows.forEach(function (l) {
       var u = l.utm || {}, c = l.calc || {};
-      lines.push([l.created_at, l.email, l.variant, u.utm_source, u.utm_medium, u.utm_campaign, u.utm_content, c.monthly, c.years, c.fee,
+      lines.push([l.created_at, l.email, l.variant, u.utm_source, u.utm_medium, u.utm_campaign, u.utm_content, l.cta, c.monthly, c.years, c.fee,
         l.time_to_lead_ms ? Math.round(l.time_to_lead_ms / 1000) : ''].map(q).join(';'));
     });
     var blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });

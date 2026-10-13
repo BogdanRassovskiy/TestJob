@@ -27,15 +27,15 @@ Klíčový poznatek, na kterém stránka stojí: **ETF obchodované na NYSE si �
 
 | Zdarma, před formulářem (hodnota je vidět hned) | Za e-mail (odemkne se okamžitě na stránce) |
 |---|---|
-| Hlavní odpověď na první obrazovce: VOO → VUAA, 0,07 %, lze koupit | Všech 6 dvojic (IVV→CSPX, VT→VWCE, VTI, SCHD→VHYL) |
+| Hlavní odpověď na první obrazovce: A „VOO → VUAA, 0,07 %, lze koupit“, B „rozdíl 316 000 Kč“ | Všech 6 dvojic (IVV→CSPX, VT→VWCE, VTI, SCHD→VHYL) |
 | 2 kompletní dvojice ve srovnání (VOO, SPY) se zdroji | Návod „první ETF v 5 krocích“ |
 | U zbylých 4 je vidět americký ticker, evropská náhrada je rozmazaná | |
 | Kalkulačka poplatků: plný výsledek bez omezení, s grafem | |
 
 **Kdy žádáme kontakt:**
-1. **hned z první obrazovky:** hlavní tlačítko vede přímo k poli pro e-mail (kurzor už v něm stojí). Pod tlačítkem je poznámka, co za e-mail dostanu: „všech 6 dvojic ETF a návod na první nákup, bez čekání, přímo na stránce“. Návštěvník, který má jen pár sekund, se tak ke kontaktu dostane na 1 dotyk a ví, do čeho jde;
+1. **hned z první obrazovky:** hlavní tlačítko vede přímo k poli pro e-mail a vloží do něj kurzor (na Androidu; iOS Safari kurzor bez dalšího dotyku nenastaví, pole je ale hned před očima). Pod tlačítkem je poznámka, co za e-mail dostanu: „všech 6 dvojic ETF a návod na první nákup, bez čekání, přímo na stránce“. Návštěvník, který má jen pár sekund, se tak ke kontaktu dostane na 1 dotyk a ví, do čeho jde;
 2. pod výsledkem kalkulačky („Odemknout celé srovnání zdarma“);
-3. na zamčených řádcích srovnání: klepnutí na rozmazanou náhradu vede k formuláři (zvědavost);
+3. na zamčených řádcích srovnání: klepnutí na rozmazanou náhradu, nebo na tlačítko „Odemknout celé srovnání“ pod nimi, vede k formuláři (zvědavost);
 4. lepicí tlačítko dole na obrazovce, když už je první obrazovka odscrollovaná a formulář není vidět.
 
 Kdo se nechce rozhodnout hned, může scrollovat: srovnání a kalkulačka jsou pod první obrazovkou a dávají hodnotu i bez e-mailu.
@@ -64,7 +64,7 @@ První obrazovka A: stejný nadpis + stejná vizuální dvojice VOO → VUAA + t
 > CTA: *Spočítat rozdíl*
 > Vizuál: velké číslo „316 000 Kč“ na tmavém pozadí.
 
-První obrazovka B: stejná otázka a **stejné číslo**. Počítá ho stejný kód jako kalkulačku, takže reklama a stránka se nerozejdou. Pod ní: kalkulačka → srovnání → formulář.
+První obrazovka B: stejná otázka a **stejné číslo**. Počítá ho stejný kód jako kalkulačku, takže reklama a stránka se nerozejdou. Kalkulačka, kterou reklama slibuje („spočítejte si to“), je hned pod první obrazovkou; hlavní tlačítko ale vede k formuláři (viz oddíl 4 a hypotéza 2). Pod ní: kalkulačka → srovnání → formulář.
 
 ## 4. Pořadí sekcí a proč
 
@@ -81,7 +81,7 @@ Principy designu: jeden sloupec, velké dotykové plochy (≥ 44 px), žádná e
 
 ## 5. Data a zdroje
 
-Všechna čísla jsou v `public/data.js`, každé s odkazem na zdroj; na stránce má každá karta odkaz „zdroj“. Datum ověření: **12. 10. 2026**.
+Všechna čísla jsou v `public/data.js`, každé s odkazem na zdroj; na stránce jsou odkazy na zdroje v rozbaleném detailu každé dvojice a souhrnně v sekci „Zdroje dat“. Datum ověření: **12. 10. 2026**.
 
 | ETF z NYSE | TER | UCITS náhrada | ISIN | TER | Shoda |
 |---|---|---|---|---|---|
@@ -104,22 +104,22 @@ QQQ jsem záměrně nezařadil: obchoduje se na Nasdaqu, ne na NYSE.
 
 ### Skuteční uživatelé: vlastní funnel + administrace
 Zadání neříká, kde se mají leady zobrazovat, proto jsem místo externí tabulky udělal **vlastní administraci** `/admin.html`. Leady i data o cestě jsou na jednom místě, bez dalších služeb:
-- **leady** jsou uložené v Redisu: e-mail, varianta, UTM, parametry kalkulačky, čas do odeslání. Když se zápis nepovede, návštěvník uvidí chybu a lead se tiše neztratí;
+- **leady** jsou uložené v Redisu: e-mail, varianta, UTM, přes které tlačítko přišel (poslední CTA před odesláním), parametry kalkulačky (jen pokud ji použil), čas do odeslání. Když se zápis nepovede, návštěvník uvidí chybu a lead se tiše neztratí;
 - **funnel**: stránka posílá anonymní počítadla kroků (`sendBeacon`, bez cookies a osobních údajů), každý krok nejvýš jednou za návštěvu. Počítadlo = počet návštěv, které se ke kroku dostaly, zvlášť pro A a B a po dnech;
-- v administraci jsou KPI, funnel o 14 krocích s procenty od vstupu pro A a B vedle sebe, tabulka po dnech, leady s vyhledáváním, export CSV (otevře se v Excelu) a výmaz leadu na žádost (GDPR).
+- v administraci jsou KPI (včetně podílu leadů, kteří použili kalkulačku, a nejčastějšího tlačítka), funnel o 14 krocích s procenty od vstupu pro A a B vedle sebe, tabulka po dnech, leady s vyhledáváním, export CSV (otevře se v Excelu) a výmaz leadu na žádost (GDPR).
 
-Ověřeno na produkci: skutečný prohlížeč (emulace iPhonu) odeslal formulář, lead se v administraci objevil se správnými UTM i výpočtem, funnel se započítal ve všech krocích a výmaz fungoval. Testovací data jsem pak smazal.
+Ověřeno na produkci (13. 10. 2026, aktuální verze): skutečný prohlížeč (emulace iPhonu) odeslal dva leady, jeden přes hlavní tlačítko bez kalkulačky a jeden přes kalkulačku. V administraci se objevily se správnou variantou, UTM, tlačítkem („první obrazovka“ / „pod kalkulačkou“) i výpočtem („nepoužil“ / „5 000 Kč × 20 let“), funnel započítal jednotlivé kroky a výmaz fungoval. Testovací leady jsem pak smazal.
 
 | Krok funnelu (událost) | Význam |
 |---|---|
 | `lp_view` | vstup na stránku |
-| `hero_cta`, `unlock_click`, `calc_cta`, `sticky_cta` | kliky na CTA (které CTA vede k leadu); `unlock_click` zahrnuje i klepnutí na zamčený řádek |
+| `hero_cta`, `unlock_click`, `calc_cta`, `sticky_cta` | kliky na CTA; `unlock_click` zahrnuje i klepnutí na zamčený řádek. Které tlačítko k leadu skutečně vedlo, je uložené přímo u leadu |
 | `section_view:{table,calc,form}` | sekce byla vidět aspoň z 25 % |
 | `calc_interact` | použití kalkulačky |
 | `form_focus` → `form_submit` → `lead_success` / `form_error` / `lead_fail` | funnel formuláře a důvody chyb |
 
 ### Volitelně: PostHog
-Pro záznamy relací a podrobnější analytiku lze doplnit klíč PostHog EU do `public/config.js`. Běží **bez cookies** (`persistence: 'memory'`), takže není potřeba cookie lišta, která na mobilu zabere první obrazovku a sama o sobě snižuje konverzi. Navíc posílá hloubku scrollu (`scroll_depth`), každou změnu v kalkulačce (`calc_change`) a odchod ze stránky (`page_leave`). Základní funnel funguje i bez něj.
+Pro záznamy relací a podrobnější analytiku lze doplnit klíč PostHog EU do `public/config.js`. Běží **bez cookies** (`persistence: 'memory'`), takže není potřeba cookie lišta, která na mobilu zabere první obrazovku a sama o sobě snižuje konverzi. Navíc posílá hloubku scrollu (`scroll_depth`), každou změnu v kalkulačce (`calc_change`), rozbalení detailu ETF (`pair_expand`) a odchod ze stránky (`page_leave`). Základní funnel funguje i bez něj.
 
 ### Laboratorní měření (`npm run measure`)
 Playwright: iPhone 13, „rychlé 4G“ (RTT 150 ms, 1,6 Mbit/s), CPU 4× pomalejší. Skript projde celou cestu a uloží snímek obrazovky každého kroku do `measure-output/`.
@@ -150,7 +150,7 @@ Očekávané mezikroky pro diagnostiku problémů: proklik hlavního CTA 25–35
 ## 8. Hypotézy pro A/B test (podle očekávaného efektu)
 
 1. **Nabídka A („VOO nekoupíte“) vs. B („316 000 Kč“)** jako dvojice reklama + stránka. Už je to zabudované (`?v=a|b`). Porovnávat **cenu za lead (CPL)**, ne jen konverzi stránky: B pravděpodobně přinese širší zásah a levnější klik, A kvalifikovanější lidi. Mění celé sdělení i publikum, proto čekám největší rozdíl: 15–30 % v CPL.
-2. **Kam vede hlavní tlačítko: rovnou k formuláři (současný stav) vs. k srovnání / kalkulačce.** Přímá cesta zkracuje funnel na 3 dotyky a sedí na návštěvníky „na pár sekund“. Cesta přes obsah buduje důvěru a může přinést víc leadů od váhajících. Směr efektu nejistý, velikost ±10–25 %. Sledovat i `form_error` a podíl leadů z kalkulačky.
+2. **Kam vede hlavní tlačítko: rovnou k formuláři (současný stav) vs. k srovnání / kalkulačce.** Přímá cesta zkracuje funnel na 3 dotyky a sedí na návštěvníky „na pár sekund“. Cesta přes obsah buduje důvěru a může přinést víc leadů od váhajících. Směr efektu nejistý, velikost ±10–25 %. Sledovat i `form_error` a podíl leadů, kteří použili kalkulačku (v administraci KPI „Leady s kalkulačkou“ a sloupec „Přes tlačítko“).
 3. **Pole pro e-mail přímo na první obrazovce** místo tlačítka. Ušetří ještě jeden dotyk a scroll. Očekávám +5–15 %; menší než u bodu 2, protože tlačítko už vede přímo k poli.
 
 Velikost vzorku: při základu 7 % a cíli zachytit +20 % relativně je potřeba ~5 700 návštěv na variantu (α = 0,05, síla testu 80 %). Proto je hypotéza 1 první: má největší efekt a ten je vidět i s dostupným rozpočtem. Hypotéza 3 s efektem kolem 10 % by potřebovala řádově 20 000 návštěv na variantu, takže dává smysl až při větší kampani.
@@ -188,7 +188,7 @@ Velikost vzorku: při základu 7 % a cíli zachytit +20 % relativně je potřeba
 11. **Smetí v repozitáři:** při připojení Upstash přidal Vercel CLI do projektu pomocné soubory agenta (`.agents/`, `skills-lock.json`). Všiml jsem si toho přes `git status` a vyřadil je z commitu.
 12. **Nesplnitelný slib:** stránka slibovala „kopii na e-mail“, ale odesílání nebylo nastavené (chybí ověřená doména). Slib jsem odstranil a stránka teď slibuje jen okamžité odemčení (viz oddíl 2).
 13. **Styly se navzájem ovlivnily:** nové rozbalovací řádky srovnání (`<details>`) převzaly styl z FAQ, takže se v nich objevilo „+“ navíc a dvojité odsazení. Kód vypadal v pořádku, chyba byla vidět jen na screenshotu. Styly FAQ jsem omezil na sekci `.faq`.
-14. **Stará verze v prohlížeči:** agent nastavil JS a CSS cache na hodinu. Po nasazení změny tak telefon načetl novou stránku, ale starý `config.js`: hlavní tlačítko mělo starý text a vedlo jinam. Při kampani by to každá úprava zopakovala. Cache je teď `max-age=0, must-revalidate` a soubory mají v odkazu verzi (`?v=3`).
+14. **Stará verze v prohlížeči:** agent nastavil JS a CSS cache na hodinu. Po nasazení změny tak telefon načetl novou stránku, ale starý `config.js`: hlavní tlačítko mělo starý text a vedlo jinam. Při kampani by to každá úprava zopakovala. Cache je teď `max-age=0, must-revalidate` a soubory mají v odkazu verzi (`?v=…`, zvyšuje se s každou změnou).
 
 ## 10. Proč chybí údaje provozovatele v `zasady.html`
 

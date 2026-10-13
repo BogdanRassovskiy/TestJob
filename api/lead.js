@@ -74,6 +74,7 @@ module.exports = async (req, res) => {
     variant: String(body.variant || '').slice(0, 4),
     utm: body.utm || {},
     calc: body.calc || null,
+    cta: ['hero_cta', 'unlock_click', 'calc_cta', 'sticky_cta'].includes(body.cta) ? body.cta : null,
     time_to_lead_ms: Number(body.time_to_lead_ms) || null,
     page: String(body.page || '').slice(0, 300),
     ua: String(req.headers['user-agent'] || '').slice(0, 300),

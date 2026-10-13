@@ -23,12 +23,16 @@
     calc_interact: 1, unlock_click: 1, calc_cta: 1, sticky_cta: 1, form_focus: 1, form_submit: 1, form_error: 1,
     lead_success: 1, lead_fail: 1 };
   var sent = {};
+  // Poslední CTA před odesláním formuláře (atribuce leadu k tlačítku).
+  var CTAS = { hero_cta: 1, unlock_click: 1, calc_cta: 1, sticky_cta: 1 };
+  var lastCta = null;
   var cfg = window.APP_CONFIG || {};
   if (cfg.posthogKey) loadPosthog(cfg.posthogKey, cfg.posthogHost);
 
   function track(name, props) {
     var p = Object.assign({ variant: variant, t_ms: Math.round(performance.now() - T0) }, props || {});
     window.__events.push({ event: name, props: p });
+    if (CTAS[name]) lastCta = name;
     if (window.posthog && window.posthog.capture) window.posthog.capture(name, p);
     var key = name === 'section_view' ? name + ':' + p.section : name;
     if (FUNNEL[key] && !sent[key]) {
@@ -186,7 +190,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email, company: form.company.value, variant: variant, utm: utm,
-        calc: calc, time_to_lead_ms: ms, page: location.pathname + location.search })
+        calc: calcTouched ? calc : null, cta: lastCta, time_to_lead_ms: ms, page: location.pathname + location.search })
     }).then(function (r) {
       if (!r.ok) throw new Error(r.status);
       track('lead_success', { time_to_lead_ms: ms, calc_touched: calcTouched });
