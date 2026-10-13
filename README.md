@@ -35,6 +35,8 @@ Zadání chce „srovnání ETF z NYSE“. Dodržel jsem ho, ale odpovídám na 
 
 ## 3. Dvě reklamy
 
+Podrobně, včetně odkazů s UTM a popisu vizuálu: [`reklamy.md`](reklamy.md).
+
 **A: „problém“** (zná ETF)
 > **VOO ani SPY z Česka nekoupíte.** Evropská dvojčata ale ano, se stejným indexem a poplatkem od 0,03 %. Podívejte se, které to jsou. *[Zobrazit srovnání]*
 > Vizuál: přeškrtnuté „VOO“ → zelené „VUAA“.
