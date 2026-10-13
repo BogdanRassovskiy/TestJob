@@ -102,7 +102,7 @@ Pro zachycení +20 % při základu 7 % je potřeba ~5 700 návštěv na variantu
 
 **Instrukce agentovi:** jen skutečná data s odkazem a datem; mobile-first, jedno pole ve formuláři; české texty bez marketingových frází a slibů výnosu; po každé změně spustit měření a zkontrolovat screenshoty.
 
-**Ověřování:** čísla ETF proti justETF/stockanalysis; cesta uživatele skriptem na emulaci iPhonu a podle screenshotů každého kroku; API a administrace end-to-end na produkci; administrace i na XSS; české texty jsem četl sám.
+**Ověřování:** čísla ETF proti justETF/stockanalysis; cesta uživatele skriptem na emulaci iPhonu a podle screenshotů každého kroku; API a administrace end-to-end na produkci; administrace i na XSS.
 
 **Kde AI chybovala:**
 1. **Data:** VT → VWCE označila jako „stejný index“; ve skutečnosti jde o různé indexy FTSE. Opraveno.
