@@ -129,11 +129,11 @@ input[type=email]:focus { outline: none; border-color: var(--accent); }
 .thanks .btn-secondary { background: var(--accent); color: var(--ink); }
 
 /* faq */
-details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; margin-bottom: 8px; }
-summary { font-weight: 700; padding: 14px 0; cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 8px; }
-summary::after { content: "+"; font-weight: 400; color: var(--muted); }
-details[open] summary::after { content: "–"; }
-details p { margin: 0 0 14px; color: var(--ink-2); font-size: 15px; }
+.faq details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; margin-bottom: 8px; }
+.faq summary { font-weight: 700; padding: 14px 0; cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 8px; }
+.faq summary::after { content: "+"; font-weight: 400; color: var(--muted); }
+.faq details[open] summary::after { content: "–"; }
+.faq details p { margin: 0 0 14px; color: var(--ink-2); font-size: 15px; }
 
 .sources p { font-size: 13px; color: var(--ink-2); }
 .disclaimer { color: var(--muted) !important; }
@@ -149,3 +149,45 @@ details p { margin: 0 0 14px; color: var(--ink-2); font-size: 15px; }
   main, .top { max-width: 600px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* ---- kompaktní srovnání ---- */
+.pairs { gap: 8px; }
+.pair { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.pair-row { display: grid; grid-template-columns: 76px 18px 1fr 20px; align-items: center; gap: 8px; padding: 12px 14px; cursor: pointer; list-style: none; text-decoration: none; color: var(--ink); }
+.pair-row::-webkit-details-marker { display: none; }
+.pr-us s { display: block; font-size: 18px; font-weight: 800; color: var(--ink-2); text-decoration-color: var(--red); text-decoration-thickness: 2px; }
+.pr-eu b { display: block; font-size: 18px; font-weight: 800; }
+.pr-us small, .pr-eu small { display: block; font-size: 12px; color: var(--muted); }
+.pr-eu small { color: var(--green); font-weight: 600; }
+.pr-arrow { color: var(--green); font-weight: 700; text-align: center; }
+.chev { width: 10px; height: 10px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); justify-self: center; transition: transform .2s; margin-top: -4px; }
+.pair[open] .chev { transform: rotate(-135deg); margin-top: 4px; }
+.pair-body { padding: 0 14px 12px; border-top: 1px solid var(--line); }
+.pair-body .nm { margin: 10px 0 8px; }
+.pair-body .src { margin: 8px 0 0; }
+.pair-body .src a { color: var(--muted); }
+.pair-locked { background: #fbfaf8; border-style: dashed; }
+.pair-locked .blur { filter: blur(5px); user-select: none; color: var(--ink-2); }
+.pair-locked .pr-eu small { color: var(--ink); text-decoration: underline; }
+.lock-ico { font-size: 14px; justify-self: center; }
+.lock { border: 0; padding: 12px 0 0; background: none; }
+.lock-text { margin: 0 0 10px; }
+
+/* ---- kalkulačka: pruhy ---- */
+.bars { display: grid; gap: 12px; margin-bottom: 4px; }
+.bar-label { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; color: var(--ink-2); margin-bottom: 4px; }
+.bar-label b { color: var(--ink); white-space: nowrap; }
+.bar-label .v-etf { color: var(--green); }
+.bar-track { display: flex; height: 18px; background: #f1eee8; border-radius: 6px; overflow: hidden; }
+.bar-track i { display: block; height: 100%; transition: width .45s ease; }
+.seg-paid { background: #9aa6b8; }
+.seg-gain { background: var(--green); }
+.seg-lost { background: repeating-linear-gradient(135deg, var(--red) 0 4px, #e9a29c 4px 8px); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; list-style: none; padding: 0; margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+@media (prefers-reduced-motion: reduce) { .bar-track i, .chev { transition: none; } }
+
+/* ---- hero: poznámka u CTA ---- */
+.cta-note { margin: 10px 0 0; font-size: 14px; color: var(--ink-2); text-align: center; }
+.cta-note b { color: var(--ink); }
+.hero .micro.trust { margin-top: 6px; }

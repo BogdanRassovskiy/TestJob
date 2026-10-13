@@ -2,7 +2,7 @@
 
 **Web:** https://etf-landing-flax.vercel.app (varianta reklamy A: `/?v=a`, varianta B: `/?v=b`)
 **Administrace:** https://etf-landing-flax.vercel.app/admin.html (heslo předám zvlášť)
-**Technologie:** statické HTML/CSS/vanilla JS (15 kB gzip při prvním načtení) + serverless funkce na Vercelu + Upstash Redis (bezplatný tarif).
+**Technologie:** statické HTML/CSS/vanilla JS (17 kB gzip při prvním načtení) + serverless funkce na Vercelu + Upstash Redis (bezplatný tarif).
 
 ```
 public/            stránka, styly, data ETF (data.js), texty variant (config.js), zasady.html
@@ -29,12 +29,16 @@ Klíčový poznatek, na kterém stránka stojí: **ETF obchodované na NYSE si �
 |---|---|
 | Hlavní odpověď na první obrazovce: VOO → VUAA, 0,07 %, lze koupit | Všech 6 dvojic (IVV→CSPX, VT→VWCE, VTI, SCHD→VHYL) |
 | 2 kompletní dvojice ve srovnání (VOO, SPY) se zdroji | Návod „první ETF v 5 krocích“ |
-| Kalkulačka poplatků: plný výsledek bez omezení | |
+| U zbylých 4 je vidět americký ticker, evropská náhrada je rozmazaná | |
+| Kalkulačka poplatků: plný výsledek bez omezení, s grafem | |
 
-**Kdy žádáme kontakt:** ne hned, ale ve chvíli nejvyšší motivace:
-1. hned pod výsledkem kalkulačky („Odemknout celé srovnání zdarma“);
-2. na „zámku“ pod druhou dvojicí ETF (zvědavost: které jsou ty další 4);
-3. lepicí tlačítko dole na obrazovce, když už je první obrazovka odscrollovaná a formulář není vidět.
+**Kdy žádáme kontakt:**
+1. **hned z první obrazovky:** hlavní tlačítko vede přímo k poli pro e-mail (kurzor už v něm stojí). Pod tlačítkem je poznámka, co za e-mail dostanu: „všech 6 dvojic ETF a návod na první nákup, bez čekání, přímo na stránce“. Návštěvník, který má jen pár sekund, se tak ke kontaktu dostane na 1 dotyk a ví, do čeho jde;
+2. pod výsledkem kalkulačky („Odemknout celé srovnání zdarma“);
+3. na zamčených řádcích srovnání: klepnutí na rozmazanou náhradu vede k formuláři (zvědavost);
+4. lepicí tlačítko dole na obrazovce, když už je první obrazovka odscrollovaná a formulář není vidět.
+
+Kdo se nechce rozhodnout hned, může scrollovat: srovnání a kalkulačka jsou pod první obrazovkou a dávají hodnotu i bez e-mailu.
 
 **Formulář má jedno pole** (e-mail) + neviditelný honeypot proti botům. Bez jména, bez zaškrtávacího políčka. Klávesnice `inputmode=email`, automatické vyplnění a upozornění na překlepy v doméně (`gmail.cz`, `seznam.com` → „Nemysleli jste…?“). Je to častá chyba českých uživatelů a s překlepem je lead ztracený.
 
@@ -52,7 +56,7 @@ Obě vedou na stejnou stránku, ale první obrazovka a pořadí sekcí se přizp
 > CTA: *Zobrazit srovnání*
 > Vizuál: přeškrtnuté „VOO“ → zelené „VUAA“.
 
-První obrazovka A: stejný nadpis + stejná vizuální dvojice VOO → VUAA. Dál: srovnání → kalkulačka → formulář.
+První obrazovka A: stejný nadpis + stejná vizuální dvojice VOO → VUAA + tlačítko k formuláři. Pod ní: srovnání → kalkulačka → formulář.
 
 **B: „peníze“** (široké publikum, lidé s penězi v bance)
 > **Bankovní fond, nebo ETF? Při 3 000 Kč měsíčně je rozdíl 316 000 Kč.**
@@ -60,16 +64,18 @@ První obrazovka A: stejný nadpis + stejná vizuální dvojice VOO → VUAA. D�
 > CTA: *Spočítat rozdíl*
 > Vizuál: velké číslo „316 000 Kč“ na tmavém pozadí.
 
-První obrazovka B: stejná otázka a **stejné číslo**. Počítá ho stejný kód jako kalkulačku, takže reklama a stránka se nerozejdou. Dál: kalkulačka → srovnání → formulář.
+První obrazovka B: stejná otázka a **stejné číslo**. Počítá ho stejný kód jako kalkulačku, takže reklama a stránka se nerozejdou. Pod ní: kalkulačka → srovnání → formulář.
 
 ## 4. Pořadí sekcí a proč
 
-1. **Hero = slib reklamy + důkaz + CTA**, vše na první obrazovce iPhonu 13 (390×664, ověřeno skriptem `measure.mjs`: `cta_above_fold: true`). Návštěvník má pár sekund, proto je odpověď („VUAA místo VOO“ / „316 000 Kč“) před tlačítkem, ne za ním.
+1. **Hero = slib reklamy + důkaz + CTA + co za e-mail dostanu**, vše na první obrazovce iPhonu 13 (390×664, ověřeno skriptem `measure.mjs`: `cta_above_fold: true`). Návštěvník má pár sekund, proto je odpověď („VUAA místo VOO“ / „316 000 Kč“) před tlačítkem. Tlačítko vede **rovnou k poli pro e-mail**, ne k dalšímu obsahu: kdo je přesvědčený už z první obrazovky, nemusí nic procházet. Hodnota výměny je napsaná přímo pod tlačítkem a hned pod ní řádek důvěry (zdroje dat, datum ověření, „nejsme broker“).
 2. **Interaktivní prvek slíbený v reklamě**: pro A srovnání, pro B kalkulačka. Shoda sdělení (message match) snižuje okamžité odchody.
 3. **Druhý interaktivní prvek.** Kdo se dostal sem, má zájem a druhý nástroj přidá hodnotu.
 4. **Formulář** s výčtem toho, co člověk získá. Nežádáme e-mail bez vysvětlení, proč ho zadat.
 5. **Časté otázky**: odstraňují námitky (proč nejde VOO, jestli je evropská verze horší, kdo za stránkou stojí a co bude s e-mailem). Jsou *za* formulářem: kdo je rozhodnutý, nemusí je přeskakovat.
 6. **Zdroje a upozornění.** Povinné pro finanční reklamu (Meta/Google) a důležité pro důvěru.
+
+Srovnání je kompaktní: každá dvojice je jeden řádek „~~VOO~~ 0,03 % → VUAA 0,07 %“, detail (ISIN, velikost, poznámka, zdroje) se rozbalí klepnutím. Na mobilu tak návštěvník vidí všech 6 řádků najednou a zamčené náhrady ho lákají k odemčení. Kalkulačka ukazuje výsledek i graficky: dva pruhy (vklady / výnos / co vezmou poplatky), které se mění s každým klepnutím.
 
 Principy designu: jeden sloupec, velké dotykové plochy (≥ 44 px), žádná externí písma, obrázky ani frameworky (FCP ≈ 0,45 s na „rychlém 4G“ se 4× zpomaleným CPU). Barvy: červená = „nejde“, zelená = „jde / úspora“, žlutá = akce.
 
@@ -107,7 +113,7 @@ Ověřeno na produkci: skutečný prohlížeč (emulace iPhonu) odeslal formulá
 | Krok funnelu (událost) | Význam |
 |---|---|
 | `lp_view` | vstup na stránku |
-| `hero_cta`, `unlock_click`, `calc_cta`, `sticky_cta` | kliky na CTA (které CTA vede k leadu) |
+| `hero_cta`, `unlock_click`, `calc_cta`, `sticky_cta` | kliky na CTA (které CTA vede k leadu); `unlock_click` zahrnuje i klepnutí na zamčený řádek |
 | `section_view:{table,calc,form}` | sekce byla vidět aspoň z 25 % |
 | `calc_interact` | použití kalkulačky |
 | `form_focus` → `form_submit` → `lead_success` / `form_error` / `lead_fail` | funnel formuláře a důvody chyb |
@@ -120,14 +126,13 @@ Playwright: iPhone 13, „rychlé 4G“ (RTT 150 ms, 1,6 Mbit/s), CPU 4× pomale
 
 | Krok | Varianta A | Varianta B | Dotyků |
 |---|---|---|---|
-| FCP / LCP (produkce) | 496 / 608 ms | 436 / 476 ms | — |
-| Objem přenosu (produkce, gzip) | 15 kB | 15 kB | — |
+| FCP / LCP (produkce) | 488 / 540 ms | 464 / 516 ms | — |
+| Objem přenosu (produkce, gzip) | 17 kB | 17 kB | — |
 | První obrazovka: H1 + CTA vidět | ✓ | ✓ | 0 |
-| → výsledek kalkulačky | 1,7 s | 1,7 s | 3 |
-| → formulář | 2,6 s | 2,5 s | 4 |
-| → lead odeslán, obsah odemčen | 3,6 s | 3,3 s | 6 |
+| → formulář, kurzor v poli e-mail | 1,7 s | 1,7 s | 1 |
+| → lead odeslán, obsah odemčen | 2,6 s | 2,6 s | 3 |
 
-(Časy skriptu, bez čtení člověkem. Podstatné je, že cesta potřebuje **6 dotyků**, žádnou novou stránku a jedno vstupní pole.)
+(Časy skriptu, bez čtení člověkem. Podstatné je, že nejkratší cesta potřebuje **3 dotyky** (tlačítko, pole, odeslat), žádnou novou stránku a jedno vstupní pole. Skript navíc ve druhém průchodu ukládá screenshoty srovnání a kalkulačky.)
 
 ## 7. Očekávaná konverze
 
@@ -140,15 +145,15 @@ Orientační hodnoty z Unbounce Conversion Benchmark (Q4 2024): medián finančn
 
 Proč ne víc: studený provoz ze sociálních sítí, finanční téma (nedůvěra), část lidí dostane odpověď už na první obrazovce a odejde. To je vědomá cena za poctivou hodnotu před formulářem.
 
-Očekávané mezikroky pro diagnostiku problémů: proklik hlavního CTA 30–40 %, podíl návštěv, které dojdou k formuláři, 25–35 %, `form_focus → lead_success` ≥ 60 %.
+Očekávané mezikroky pro diagnostiku problémů: proklik hlavního CTA 25–35 % (vede rovnou k formuláři, takže je „dražší“ než klik na obsah), podíl návštěv, které dojdou k formuláři, 25–35 %, `form_focus → lead_success` ≥ 60 %.
 
 ## 8. Hypotézy pro A/B test (podle očekávaného efektu)
 
-1. **Pole pro e-mail přímo na první obrazovce** (pod slibem) vs. současné tlačítko se scrollem k formuláři. *Proč první:* většina lidí odejde během pár sekund a k formuláři nedoscrolluje; jednokrokový formulář odstraní celý krok funnelu. Očekávám +20–40 % relativně. Riziko: menší zapojení a „studenější“ leady, proto sledovat i otevíranost prvního e-mailu.
-2. **Nabídka A („VOO nekoupíte“) vs. B („316 000 Kč“)** jako dvojice reklama + stránka. Už je to zabudované (`?v=a|b`). Porovnávat **cenu za lead (CPL)**, ne jen konverzi stránky: B pravděpodobně přinese širší zásah a levnější klik, A kvalifikovanější lidi. Očekávám rozdíl v CPL 15–30 %.
-3. **Kolik ukázat zdarma:** 1 otevřená dvojice vs. 2 (současný stav) vs. 4. Méně otevřeného = víc zvědavosti, ale i méně důvěry. Očekávám ±10–15 %.
+1. **Nabídka A („VOO nekoupíte“) vs. B („316 000 Kč“)** jako dvojice reklama + stránka. Už je to zabudované (`?v=a|b`). Porovnávat **cenu za lead (CPL)**, ne jen konverzi stránky: B pravděpodobně přinese širší zásah a levnější klik, A kvalifikovanější lidi. Mění celé sdělení i publikum, proto čekám největší rozdíl: 15–30 % v CPL.
+2. **Kam vede hlavní tlačítko: rovnou k formuláři (současný stav) vs. k srovnání / kalkulačce.** Přímá cesta zkracuje funnel na 3 dotyky a sedí na návštěvníky „na pár sekund“. Cesta přes obsah buduje důvěru a může přinést víc leadů od váhajících. Směr efektu nejistý, velikost ±10–25 %. Sledovat i `form_error` a podíl leadů z kalkulačky.
+3. **Pole pro e-mail přímo na první obrazovce** místo tlačítka. Ušetří ještě jeden dotyk a scroll. Očekávám +5–15 %; menší než u bodu 2, protože tlačítko už vede přímo k poli.
 
-Velikost vzorku: při základu 7 % a cíli zachytit +20 % relativně je potřeba ~5 700 návštěv na variantu (α = 0,05, síla testu 80 %). Proto je hypotéza 1 první: má největší efekt a ten je vidět i s dostupným rozpočtem.
+Velikost vzorku: při základu 7 % a cíli zachytit +20 % relativně je potřeba ~5 700 návštěv na variantu (α = 0,05, síla testu 80 %). Proto je hypotéza 1 první: má největší efekt a ten je vidět i s dostupným rozpočtem. Hypotéza 3 s efektem kolem 10 % by potřebovala řádově 20 000 návštěv na variantu, takže dává smysl až při větší kampani.
 
 ## 9. Jak jsem pracoval s AI (Claude Code)
 
@@ -182,6 +187,7 @@ Velikost vzorku: při základu 7 % a cíli zachytit +20 % relativně je potřeba
 10. **Test, který vypadal jako chyba:** počítadlo funnelu na produkci „nezapočítalo“ požadavek z curl. Curl posílal data jako form-urlencoded, kdežto prohlížeč (`sendBeacon`) posílá `text/plain`. Se správným formátem i v end-to-end testu v prohlížeči se vše počítá. Byla to chyba testu, ne kódu, ale bylo nutné ji ověřit, ne odbýt.
 11. **Smetí v repozitáři:** při připojení Upstash přidal Vercel CLI do projektu pomocné soubory agenta (`.agents/`, `skills-lock.json`). Všiml jsem si toho přes `git status` a vyřadil je z commitu.
 12. **Nesplnitelný slib:** stránka slibovala „kopii na e-mail“, ale odesílání nebylo nastavené (chybí ověřená doména). Slib jsem odstranil a stránka teď slibuje jen okamžité odemčení (viz oddíl 2).
+13. **Styly se navzájem ovlivnily:** nové rozbalovací řádky srovnání (`<details>`) převzaly styl z FAQ, takže se v nich objevilo „+“ navíc a dvojité odsazení. Kód vypadal v pořádku, chyba byla vidět jen na screenshotu. Styly FAQ jsem omezil na sekci `.faq`.
 
 ## 10. Proč chybí údaje provozovatele v `zasady.html`
 

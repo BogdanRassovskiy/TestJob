@@ -51,18 +51,11 @@ async function run(variant) {
     return { h1_above_fold: vis('h1'), cta_above_fold: vis('[data-variant-cta]'), viewport_h: innerHeight };
   });
 
+  // Hlavní cesta: CTA na první obrazovce → pole e-mail → odeslání.
   let taps = 0;
   await page.click('[data-variant-cta]'); taps++;
-  await page.waitForTimeout(600);
-  await mark('after-hero-cta', taps);
-
-  await page.locator('#kalkulacka').scrollIntoViewIfNeeded();
-  await page.click('[data-calc="monthly"] button[data-val="5000"]'); taps++;
-  await page.click('[data-calc="years"] button[data-val="30"]'); taps++;
-  await mark('calc-result', taps);
-
-  await page.click('a[data-track="calc_cta"]'); taps++;
   await page.waitForTimeout(700);
+  const formFocused = await page.evaluate(() => document.activeElement && document.activeElement.id === 'email');
   await mark('form', taps);
 
   await page.fill('#email', 'mereni@seznam.cz'); taps++; // tap do pole + psaní
@@ -71,10 +64,26 @@ async function run(variant) {
   await page.waitForTimeout(700);
   await mark('thanks', taps);
 
+  // Vedlejší průchod (screenshoty interaktivních prvků), nový kontext = zamčený stav.
+  const ctx2 = await browser.newContext({ ...devices['iPhone 13'] });
+  const p2 = await ctx2.newPage();
+  if (!BASE.includes('localhost')) await p2.route('**/api/{lead,track}', (r) => r.fulfill({ status: 204 }));
+  await p2.goto(`${BASE}/?v=${variant}`);
+  await p2.locator('#srovnani').scrollIntoViewIfNeeded();
+  await p2.evaluate(() => document.querySelector('#srovnani').scrollIntoView());
+  await p2.screenshot({ path: `${OUT}/${variant}-x1-srovnani.png` });
+  await p2.evaluate(() => document.querySelector('#kalkulacka').scrollIntoView());
+  await p2.click('[data-calc="monthly"] button[data-val="5000"]');
+  await p2.click('[data-calc="years"] button[data-val="30"]');
+  await p2.waitForTimeout(600);
+  await p2.evaluate(() => document.querySelector('.result').scrollIntoView({ block: 'center' }));
+  await p2.screenshot({ path: `${OUT}/${variant}-x2-kalkulacka.png` });
+  await ctx2.close();
+
   const events = await page.evaluate(() => window.__events.map((e) => `${e.props.t_ms}ms ${e.event}${e.props.section ? ':' + e.props.section : ''}${e.props.depth ? ':' + e.props.depth : ''}`));
   const unlockedPairs = await page.locator('.pair').count();
   await browser.close();
-  return { variant, vitals, fold, steps, unlockedPairs, events };
+  return { variant, vitals, fold, formFocused, steps, unlockedPairs, events };
 }
 
 const results = [];
@@ -82,7 +91,7 @@ for (const v of ['a', 'b']) results.push(await run(v));
 fs.writeFileSync(`${OUT}/results.json`, JSON.stringify(results, null, 2));
 for (const r of results) {
   console.log(`\n=== Varianta ${r.variant.toUpperCase()} ===`);
-  console.log('Vitals:', r.vitals, 'Fold:', r.fold);
+  console.log('Vitals:', r.vitals, 'Fold:', r.fold, 'Fokus v poli e-mail po CTA:', r.formFocused);
   console.table(r.steps);
   console.log('Odemčeno dvojic:', r.unlockedPairs);
   console.log('Události:', r.events.join(' | '));

@@ -51,7 +51,8 @@
 
 
     <a href="#" class="btn btn-primary" data-variant-cta data-track="hero_cta"></a>
-    <p class="micro">Nic neprodáváme, nejsme broker. Zdroje dat najdete u každého čísla.</p>
+    <p class="cta-note">Za e-mail hned odemknete <b>všech 6 dvojic ETF</b> a <b>návod na první nákup</b>. Bez čekání, přímo na stránce.</p>
+    <p class="micro trust">Data z justETF a stockanalysis.com, ověřeno <span data-date></span>. Nejsme broker, nic neprodáváme.</p>
     <ul class="you-get hero-get">
       <li><b>Srovnání 6 ETF z NYSE</b> a jejich UCITS náhrad dostupných v ČR</li>
       <li><b>Kalkulačka</b>, kolik vás stojí poplatky za 10–30 let</li>
@@ -62,11 +63,10 @@
   <!-- SROVNÁNÍ -->
   <section class="block" id="srovnani" data-section="table">
     <h2>Co koupit místo amerických ETF</h2>
-    <p class="sub">Nahoře ETF z newyorské burzy, pod ním jeho evropská verze (UCITS), kterou vám český broker prodá.</p>
+    <p class="sub">Vlevo ETF z newyorské burzy, vpravo jeho evropská verze (UCITS), kterou vám český broker prodá. Klepnutím zobrazíte detail.</p>
     <div class="pairs" data-pairs></div>
     <div class="lock" data-lock>
-      <p class="lock-title"><span aria-hidden="true">🔒</span> Další 4 dvojice: IVV, VT, VTI, SCHD</p>
-      <p class="lock-text">Včetně celosvětového VWCE a dividendové náhrady za SCHD. Odemkneme hned po zadání e-mailu.</p>
+      <p class="lock-text">Náhrady za IVV, VT, VTI a dividendový SCHD odemkneme hned po zadání e-mailu.</p>
       <a href="#ziskat" class="btn btn-secondary" data-track="unlock_click">Odemknout celé srovnání</a>
     </div>
   </section>
@@ -99,13 +99,20 @@
     </fieldset>
 
     <div class="result" aria-live="polite">
-      <div class="res-row">
-        <span>Fond s poplatkem <span data-out="feeLabel"></span></span>
-        <b data-out="fvFund"></b>
-      </div>
-      <div class="res-row res-etf">
-        <span>ETF s poplatkem 0,07 %</span>
-        <b data-out="fvEtf"></b>
+      <div class="bars">
+        <div class="bar-row">
+          <div class="bar-label"><span>ETF, poplatek 0,07 %</span><b class="v-etf" data-out="fvEtf"></b></div>
+          <div class="bar-track"><i class="seg-paid" data-bar="etfPaid"></i><i class="seg-gain" data-bar="etfGain"></i></div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label"><span>Fond, poplatek <span data-out="feeLabel"></span></span><b data-out="fvFund"></b></div>
+          <div class="bar-track"><i class="seg-paid" data-bar="fundPaid"></i><i class="seg-gain" data-bar="fundGain"></i><i class="seg-lost" data-bar="fundLost"></i></div>
+        </div>
+        <ul class="legend" aria-hidden="true">
+          <li><i class="seg-paid"></i>vaše vklady</li>
+          <li><i class="seg-gain"></i>výnos</li>
+          <li><i class="seg-lost"></i>vezmou poplatky</li>
+        </ul>
       </div>
       <div class="res-diff">
         <span>Na poplatcích ušetříte</span>

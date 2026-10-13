@@ -12,16 +12,16 @@ window.VARIANTS = {
     eyebrow: 'Srovnání ETF z NYSE pro české investory',
     h1: 'VOO ani SPY z Česka nekoupíte. Jejich evropská dvojčata ano.',
     lead: 'Ukážeme vám, co koupit místo 6 nejoblíbenějších ETF z NYSE.',
-    cta: 'Ukázat srovnání',
-    target: '#srovnani',
+    cta: 'Získat celé srovnání zdarma',
+    target: '#ziskat',
     order: ['hero', 'table', 'calc', 'form', 'faq', 'sources']
   },
   b: {
     eyebrow: 'Kalkulačka poplatků pro české investory',
     h1: 'Bankovní fond, nebo ETF? Rozdíl dělá statisíce.',
-    lead: 'Spočítejte si za 10 sekund, kolik vám vezmou poplatky.',
-    cta: 'Spočítat můj rozdíl',
-    target: '#kalkulacka',
+    lead: 'Spočítali jsme, kolik vám vezmou poplatky. A které ETF si jako Čech opravdu koupíte.',
+    cta: 'Získat srovnání a návod zdarma',
+    target: '#ziskat',
     order: ['hero', 'calc', 'table', 'form', 'faq', 'sources']
   }
 };

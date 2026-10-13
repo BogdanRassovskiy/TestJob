@@ -80,13 +80,18 @@
     var fund = fv(calc.monthly, calc.years, calc.fee);
     var etf = fv(calc.monthly, calc.years, window.ETF_TER);
     var diff = round1k(etf - fund);
+    var paid = calc.monthly * calc.years * 12;
+    var w = function (x) { return (Math.max(x, 0) / etf * 100).toFixed(2) + '%'; };
+    setBar('etfPaid', w(paid)); setBar('etfGain', w(etf - paid));
+    setBar('fundPaid', w(paid)); setBar('fundGain', w(fund - paid)); setBar('fundLost', w(etf - fund));
     out('feeLabel', calc.fee.toLocaleString('cs-CZ') + ' %');
     out('fvFund', czk.format(round1k(fund)));
     out('fvEtf', czk.format(round1k(etf)));
     out('diff', czk.format(diff));
-    out('paid', czk.format(calc.monthly * calc.years * 12));
+    out('paid', czk.format(paid));
     return diff;
   }
+  function setBar(key, w) { $$('[data-bar="' + key + '"]').forEach(function (el) { el.style.width = w; }); }
   function out(key, val) { $$('[data-out="' + key + '"]').forEach(function (el) { el.textContent = val; }); }
 
   $$('[data-calc]').forEach(function (group) {
@@ -110,28 +115,37 @@
   var FREE_ROWS = 2;
   var unlocked = localStorage.getItem('etf_unlocked') === '1';
 
-  function pairHtml(p) {
-    return '<article class="pair">' +
-      '<div class="side us">' +
-        '<div class="side-head"><span class="tk">' + p.us.ticker + '</span><span class="badge no">v ČR nekoupíte</span></div>' +
-        '<p class="nm">' + p.us.name + '</p>' +
-        '<dl><div><dt>Poplatek</dt><dd>' + pct(p.us.ter) + '</dd></div><div><dt>Velikost</dt><dd>' + p.us.aum + '</dd></div></dl>' +
-        '<a class="src" href="' + p.us.src + '" rel="noopener" target="_blank">zdroj</a>' +
-      '</div>' +
-      '<div class="arrow" aria-hidden="true">↓</div>' +
-      '<div class="side eu">' +
-        '<div class="side-head"><span class="tk">' + p.eu.ticker + '</span><span class="badge yes">' + p.match + '</span></div>' +
-        '<p class="nm">' + p.eu.name + '</p>' +
-        '<dl><div><dt>Poplatek</dt><dd>' + pct(p.eu.ter) + '</dd></div><div><dt>Velikost</dt><dd>' + p.eu.aum + '</dd></div>' +
-        '<div><dt>Dividendy</dt><dd>' + p.eu.policy + '</dd></div><div><dt>ISIN</dt><dd class="isin">' + p.eu.isin + '</dd></div></dl>' +
+  function pairHtml(p, i) {
+    return '<details class="pair"' + (i === 0 ? ' open' : '') + '>' +
+      '<summary class="pair-row">' +
+        '<span class="pr-us"><s>' + p.us.ticker + '</s><small>' + pct(p.us.ter) + '</small></span>' +
+        '<span class="pr-arrow" aria-hidden="true">→</span>' +
+        '<span class="pr-eu"><b>' + p.eu.ticker + '</b><small>' + pct(p.eu.ter) + ' · ' + p.match + '</small></span>' +
+        '<span class="chev" aria-hidden="true"></span>' +
+      '</summary>' +
+      '<div class="pair-body">' +
+        '<p class="nm"><b>' + p.eu.name + '</b></p>' +
+        '<dl><div><dt>ISIN</dt><dd class="isin">' + p.eu.isin + '</dd></div><div><dt>Dividendy</dt><dd>' + p.eu.policy + '</dd></div>' +
+        '<div><dt>Velikost (EU)</dt><dd>' + p.eu.aum + '</dd></div><div><dt>Velikost ' + p.us.ticker + '</dt><dd>' + p.us.aum + '</dd></div></dl>' +
         '<p class="note">' + p.note + '</p>' +
-        '<a class="src" href="' + p.eu.src + '" rel="noopener" target="_blank">zdroj</a>' +
+        '<p class="src">Zdroje: <a href="' + p.us.src + '" rel="noopener" target="_blank">' + p.us.ticker + '</a> · ' +
+          '<a href="' + p.eu.src + '" rel="noopener" target="_blank">' + p.eu.ticker + '</a></p>' +
       '</div>' +
-    '</article>';
+    '</details>';
+  }
+  function lockedHtml(p) {
+    return '<a href="#ziskat" class="pair pair-row pair-locked" data-locked>' +
+      '<span class="pr-us"><s>' + p.us.ticker + '</s><small>' + pct(p.us.ter) + '</small></span>' +
+      '<span class="pr-arrow" aria-hidden="true">→</span>' +
+      '<span class="pr-eu"><b class="blur" aria-hidden="true">XXXX</b><small>odemknout zdarma</small></span>' +
+      '<span class="lock-ico" aria-hidden="true">🔒</span>' +
+    '</a>';
   }
   function renderPairs() {
-    var rows = unlocked ? window.ETF_PAIRS : window.ETF_PAIRS.slice(0, FREE_ROWS);
-    $('[data-pairs]').innerHTML = rows.map(pairHtml).join('');
+    var all = window.ETF_PAIRS;
+    var html = unlocked ? all.map(pairHtml).join('')
+      : all.slice(0, FREE_ROWS).map(pairHtml).join('') + all.slice(FREE_ROWS).map(lockedHtml).join('');
+    $('[data-pairs]').innerHTML = html;
     $('[data-lock]').hidden = unlocked;
   }
   renderPairs();
@@ -193,18 +207,28 @@
   });
 
   // ---------- Kliky na CTA ----------
+  function goTo(href) {
+    $(href).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (href === '#ziskat') setTimeout(function () { input.focus({ preventScroll: true }); }, 450);
+  }
   $$('[data-track]').forEach(function (el) {
     el.addEventListener('click', function (e) {
       track(el.getAttribute('data-track'));
       var href = el.getAttribute('href');
-      if (href && href.charAt(0) === '#') {
-        e.preventDefault();
-        var target = $(href);
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        if (href === '#ziskat') setTimeout(function () { input.focus({ preventScroll: true }); }, 450);
-      }
+      if (href && href.charAt(0) === '#') { e.preventDefault(); goTo(href); }
     });
   });
+  // Zamčené řádky srovnání se vykreslují dynamicky, proto delegace.
+  var pairsEl = $('[data-pairs]');
+  pairsEl.addEventListener('click', function (e) {
+    if (!e.target.closest('[data-locked]')) return;
+    e.preventDefault();
+    track('unlock_click', { from: 'row' });
+    goTo('#ziskat');
+  });
+  pairsEl.addEventListener('toggle', function (e) {
+    if (e.target.open) track('pair_expand', { ticker: e.target.querySelector('.pr-us s').textContent });
+  }, true);
 
   // ---------- Viditelnost sekcí, sticky CTA, scroll ----------
   var sticky = $('[data-sticky]');
