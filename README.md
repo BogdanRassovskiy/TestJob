@@ -1,200 +1,209 @@
-# ETFmapa.cz: лендинг-лидмагнит «ETF с NYSE для чешского инвестора»
+# ETFmapa.cz: lead magnet „ETF z NYSE pro českého investora“
 
-**Сайт:** https://etf-landing-flax.vercel.app (вариант объявления A: `/?v=a`, вариант B: `/?v=b`)
-**Админка:** https://etf-landing-flax.vercel.app/admin.html (пароль передаётся отдельно)
-**Стек:** статический HTML/CSS/vanilla JS (15 КБ gzip на первую загрузку) + serverless-функции на Vercel + Upstash Redis (бесплатный тариф).
+**Web:** https://etf-landing-flax.vercel.app (varianta reklamy A: `/?v=a`, varianta B: `/?v=b`)
+**Administrace:** https://etf-landing-flax.vercel.app/admin.html (heslo předám zvlášť)
+**Technologie:** statické HTML/CSS/vanilla JS (15 kB gzip při prvním načtení) + serverless funkce na Vercelu + Upstash Redis (bezplatný tarif).
 
 ```
-public/        страница, стили, данные ETF (data.js), тексты вариантов (config.js), zasady.html
-api/lead.js    приём лида → Redis (+ опционально webhook и письмо через Resend)
-api/track.js   анонимные счётчики шагов воронки → Redis
-api/admin.js   данные для админки (Bearer ADMIN_PASSWORD), удаление лида
-public/admin.html  админка: KPI, воронка A/B, по дням, лиды, CSV, удаление (GDPR)
-scripts/       dev.mjs (локальный сервер без Vercel CLI), measure.mjs (замер пути на мобиле)
+public/            stránka, styly, data ETF (data.js), texty variant (config.js), zasady.html
+public/admin.html  administrace: KPI, funnel A/B, po dnech, leady, CSV, výmaz (GDPR)
+api/lead.js        příjem leadu → Redis (volitelně webhook a e-mail přes Resend, nyní vypnuto)
+api/track.js       anonymní počítadla kroků funnelu → Redis
+api/admin.js       data pro administraci (Bearer ADMIN_PASSWORD), výmaz leadu
+scripts/           dev.mjs (lokální server bez Vercel CLI), measure.mjs (měření cesty na mobilu)
 ```
 
-Запуск: `npm run dev` → http://localhost:3000. Замер: `npm i && npx playwright install chromium && npm run measure`.
+Spuštění: `npm run dev` → http://localhost:3000. Měření: `npm i && npx playwright install chromium && npm run measure`.
 
 ---
 
-## 1. Целевая аудитория
+## 1. Cílová skupina
 
-**Чех 25–40 лет, начинающий или полупродвинутый инвестор.** Слышал про S&P 500 и VOO/SPY из YouTube, Reddit или от знакомых. Часто у него уже есть деньги на spořicí účet или в банковском фонде, который ему продали в отделении. Приходит из Meta/Instagram или из поиска с телефона и даёт странице 3–5 секунд.
+**Čech ve věku 25–40 let, začínající nebo mírně pokročilý investor.** O S&P 500 a VOO/SPY slyšel na YouTube, Redditu nebo od známých. Často už má peníze na spořicím účtu nebo v bankovním fondu, který mu prodali na pobočce. Přichází z Meta/Instagramu nebo z vyhledávání na mobilu a stránce dá 3–5 sekund.
 
-Ключевой инсайт, на котором построена страница: **ETF, которые торгуются на NYSE, чешский розничный инвестор купить не может.** По регламенту PRIIPs (EU 1286/2014) нужен документ KID, а американские эмитенты его не выпускают. Человек ищет VOO у брокера и не находит. Задание просит «сравнение ETF с NYSE», и я сохранил его буквально, но сравнение отвечает на реальный вопрос посетителя: *«что купить вместо них?»* Каждому из 6 самых популярных ETF с NYSE поставлен его европейский UCITS-аналог, который продаёт чешский брокер. Шаблонный лендинг «топ-10 ETF» был бы бесполезен для этой аудитории: она не может купить ни один из них.
+Klíčový poznatek, na kterém stránka stojí: **ETF obchodované na NYSE si český drobný investor koupit nemůže.** Nařízení PRIIPs (EU 1286/2014) vyžaduje dokument KID a americké fondy ho nevydávají. Člověk hledá VOO u brokera a nenajde ho. Zadání chce „srovnání ETF z NYSE“. To jsem dodržel doslova, ale srovnání odpovídá na skutečnou otázku návštěvníka: *„co koupit místo nich?“* Ke každému ze 6 nejoblíbenějších ETF z NYSE je přiřazena jeho evropská UCITS verze, kterou český broker prodá. Šablonovitá stránka „top 10 ETF“ by byla pro tuto skupinu k ničemu: nekoupí si ani jeden z nich.
 
-## 2. Что посетитель получает и когда мы просим контакт
+## 2. Co návštěvník dostane a kdy žádáme kontakt
 
-| Бесплатно, до формы (ценность видна сразу) | За email |
+| Zdarma, před formulářem (hodnota je vidět hned) | Za e-mail (odemkne se okamžitě na stránce) |
 |---|---|
-| Главный ответ на первом экране: VOO → VUAA, 0,07 %, можно купить | Все 6 пар (IVV→CSPX, VT→VWCE, VTI, SCHD→VHYL) |
-| 2 полные пары в сравнении (VOO, SPY) с источниками | Персональный расчёт из калькулятора на email |
-| Калькулятор комиссий: полный результат без ограничений | Инструкция «первый ETF за 5 шагов» |
+| Hlavní odpověď na první obrazovce: VOO → VUAA, 0,07 %, lze koupit | Všech 6 dvojic (IVV→CSPX, VT→VWCE, VTI, SCHD→VHYL) |
+| 2 kompletní dvojice ve srovnání (VOO, SPY) se zdroji | Návod „první ETF v 5 krocích“ |
+| Kalkulačka poplatků: plný výsledek bez omezení | |
 
-**Когда просим контакт:** не сразу, а в момент максимальной мотивации:
-1. сразу под результатом калькулятора («Pošlete mi výpočet a celé srovnání»);
-2. на «замке» под второй парой ETF (любопытство: какие ещё 4);
-3. липкая кнопка внизу экрана, когда первый экран уже прокручен и форма не видна.
+**Kdy žádáme kontakt:** ne hned, ale ve chvíli nejvyšší motivace:
+1. hned pod výsledkem kalkulačky („Odemknout celé srovnání zdarma“);
+2. na „zámku“ pod druhou dvojicí ETF (zvědavost: které jsou ty další 4);
+3. lepicí tlačítko dole na obrazovce, když už je první obrazovka odscrollovaná a formulář není vidět.
 
-**Форма — одно поле** (email) + невидимый honeypot от ботов. Без имени, без чекбокса. Тип клавиатуры `inputmode=email`, автозаполнение и подсказка опечаток в доменах (`gmail.cz`, `seznam.com` → «Nemysleli jste…?»). Это частая ошибка у чешских пользователей, а с опечаткой лид потерян.
+**Formulář má jedno pole** (e-mail) + neviditelný honeypot proti botům. Bez jména, bez zaškrtávacího políčka. Klávesnice `inputmode=email`, automatické vyplnění a upozornění na překlepy v doméně (`gmail.cz`, `seznam.com` → „Nemysleli jste…?“). Je to častá chyba českých uživatelů a s překlepem je lead ztracený.
 
-**После отправки** ценность выдаётся **мгновенно на странице**, ожидание письма не нужно: таблица разблокируется (и остаётся разблокированной при повторном визите, localStorage), показывается инструкция из 5 шагов, и копия уходит на email (Resend). Если запись лида не удалась, человек видит ошибку и может повторить, лид не теряется молча.
+**Po odeslání** dostane návštěvník hodnotu **okamžitě na stránce**, na nic nečeká. Tabulka se odemkne a zůstane odemčená i při další návštěvě (localStorage), stránka sama doscrolluje k návodu v 5 krocích. Pokud se lead nepodaří uložit, člověk uvidí chybu a může to zkusit znovu, lead se tiše neztratí.
 
-## 3. Два объявления
+**Proč stránka neslibuje e-mail s výsledkem:** odesílání přes Resend je v kódu připravené (`api/lead.js`), ale vyžaduje ověřenou vlastní doménu, kterou zatím nemám. Stránka proto slibuje jen to, co opravdu splní: okamžité odemčení. E-mail slouží k pozdějšímu zasílání tipů (nejvýš 1 měsíčně). Jakmile bude doména, stačí nastavit `RESEND_API_KEY` a `MAIL_FROM` a vrátit do textu „pošleme na e-mail“.
 
-Оба ведут на ту же страницу, но первый экран и порядок секций подстраиваются под обещание объявления (`?v=a|b`, или `utm_content`).
+## 3. Dvě reklamy
 
-**A: «проблема»** (для тех, кто уже знает про ETF)
+Obě vedou na stejnou stránku, ale první obrazovka a pořadí sekcí se přizpůsobí slibu reklamy (`?v=a|b`, případně `utm_content`).
+
+**A: „problém“** (pro ty, kdo už ETF znají)
 > **VOO ani SPY z Česka nekoupíte.**
 > Evropská dvojčata ale ano, se stejným indexem a poplatkem od 0,03 %. Podívejte se, které to jsou.
 > CTA: *Zobrazit srovnání*
-> Креатив: перечёркнутый «VOO» → зелёный «VUAA».
+> Vizuál: přeškrtnuté „VOO“ → zelené „VUAA“.
 
-Первый экран A: тот же заголовок + та же визуальная пара VOO → VUAA. Далее: сравнение → калькулятор → форма.
+První obrazovka A: stejný nadpis + stejná vizuální dvojice VOO → VUAA. Dál: srovnání → kalkulačka → formulář.
 
-**B: «деньги»** (широкая аудитория, у кого деньги в банке)
+**B: „peníze“** (široké publikum, lidé s penězi v bance)
 > **Bankovní fond, nebo ETF? Při 3 000 Kč měsíčně je rozdíl 316 000 Kč.**
 > Za 20 let, jen na poplatcích. Spočítejte si to za 10 sekund.
 > CTA: *Spočítat rozdíl*
-> Креатив: крупное число «316 000 Kč» на тёмном фоне.
+> Vizuál: velké číslo „316 000 Kč“ na tmavém pozadí.
 
-Первый экран B: тот же вопрос и **то же число**. Оно считается тем же кодом, что и калькулятор, поэтому объявление и страница не разойдутся. Далее: калькулятор → сравнение → форма.
+První obrazovka B: stejná otázka a **stejné číslo**. Počítá ho stejný kód jako kalkulačku, takže reklama a stránka se nerozejdou. Dál: kalkulačka → srovnání → formulář.
 
-## 4. Порядок секций и почему
+## 4. Pořadí sekcí a proč
 
-1. **Hero = обещание объявления + доказательство + CTA**, всё в первом экране iPhone 13 (390×664, проверено скриптом `measure.mjs`: `cta_above_fold: true`). У посетителя несколько секунд, поэтому ответ («VUAA вместо VOO» / «316 000 Kč») стоит до кнопки, а не после.
-2. **Интерактив, который обещан в объявлении**: для A сравнение, для B калькулятор. Message match снижает отказы.
-3. **Второй интерактив.** Кто дошёл сюда, вовлечён, и второй инструмент добавляет ценности.
-4. **Форма** с перечнем того, что человек получит, включая *его собственный* расчёт («5 000 Kč měsíčně, 30 let = rozdíl 1 855 000 Kč»). Персонализация повышает воспринимаемую ценность.
-5. **FAQ**: снимает возражения (почему нельзя VOO, не хуже ли евро-версия, кто мы и что будет с email). Стоит *после* формы: кто готов, не должен через это пролистывать.
-6. **Источники и дисклеймер.** Обязательно для финансовой рекламы (Meta/Google) и для доверия.
+1. **Hero = slib reklamy + důkaz + CTA**, vše na první obrazovce iPhonu 13 (390×664, ověřeno skriptem `measure.mjs`: `cta_above_fold: true`). Návštěvník má pár sekund, proto je odpověď („VUAA místo VOO“ / „316 000 Kč“) před tlačítkem, ne za ním.
+2. **Interaktivní prvek slíbený v reklamě**: pro A srovnání, pro B kalkulačka. Shoda sdělení (message match) snižuje okamžité odchody.
+3. **Druhý interaktivní prvek.** Kdo se dostal sem, má zájem a druhý nástroj přidá hodnotu.
+4. **Formulář** s výčtem toho, co člověk získá. Nežádáme e-mail bez vysvětlení, proč ho zadat.
+5. **Časté otázky**: odstraňují námitky (proč nejde VOO, jestli je evropská verze horší, kdo za stránkou stojí a co bude s e-mailem). Jsou *za* formulářem: kdo je rozhodnutý, nemusí je přeskakovat.
+6. **Zdroje a upozornění.** Povinné pro finanční reklamu (Meta/Google) a důležité pro důvěru.
 
-Принципы дизайна: одна колонка, крупные тап-зоны (≥44 px), без внешних шрифтов, картинок и фреймворков (FCP ≈ 0,45 с на «быстром 4G» с 4× CPU throttling). Цвета: красный = «нельзя», зелёный = «можно/экономия», жёлтый = действие.
+Principy designu: jeden sloupec, velké dotykové plochy (≥ 44 px), žádná externí písma, obrázky ani frameworky (FCP ≈ 0,45 s na „rychlém 4G“ se 4× zpomaleným CPU). Barvy: červená = „nejde“, zelená = „jde / úspora“, žlutá = akce.
 
-## 5. Данные и источники
+## 5. Data a zdroje
 
-Все цифры в `public/data.js`, у каждой ссылка на источник; на странице у каждой карточки ссылка «zdroj». Дата проверки: **12. 10. 2026**.
+Všechna čísla jsou v `public/data.js`, každé s odkazem na zdroj; na stránce má každá karta odkaz „zdroj“. Datum ověření: **12. 10. 2026**.
 
-| NYSE ETF | TER | UCITS-аналог | ISIN | TER | Соответствие |
+| ETF z NYSE | TER | UCITS náhrada | ISIN | TER | Shoda |
 |---|---|---|---|---|---|
-| VOO | 0,03 % | VUAA | IE00BFMXXD54 | 0,07 % | тот же индекс |
-| SPY | 0,09 % | SPYL | IE000XZSV718 | 0,03 % | тот же индекс |
-| IVV | 0,03 % | CSPX / SXR8 | IE00B5BMR087 | 0,07 % | тот же индекс |
-| VT | 0,06 % | VWCE | IE00BK5BQT80 | 0,14 % | похожий индекс |
-| VTI | 0,03 % | CSPX / SXR8 | IE00B5BMR087 | 0,07 % | ближайшая замена |
-| SCHD | 0,06 % | VHYL | IE00B8GKDB10 | 0,29 % | ближайшая замена |
+| VOO | 0,03 % | VUAA | IE00BFMXXD54 | 0,07 % | stejný index |
+| SPY | 0,09 % | SPYL | IE000XZSV718 | 0,03 % | stejný index |
+| IVV | 0,03 % | CSPX / SXR8 | IE00B5BMR087 | 0,07 % | stejný index |
+| VT | 0,06 % | VWCE | IE00BK5BQT80 | 0,14 % | podobný index |
+| VTI | 0,03 % | CSPX / SXR8 | IE00B5BMR087 | 0,07 % | nejbližší náhrada |
+| SCHD | 0,06 % | VHYL | IE00B8GKDB10 | 0,29 % | nejbližší náhrada |
 
-- US ETF: [stockanalysis.com](https://stockanalysis.com/etf/) (TER, AUM, биржа NYSE Arca, закрытие 9. 10. 2026).
-- UCITS ETF: [justETF](https://www.justetf.com/cz/) (TER, AUM, тип распределения).
-- Альтернативы VTI/SCHD: [investingintheweb.com](https://investingintheweb.com/blog/vti-europe-uk-alternatives/).
-- Сравнительная комиссия банковского фонда 2 %: пример Erste Top Stocks, TER 2,17 %, вступительный сбор до 3 % ([finex.cz](https://finex.cz/fond/erste-top-stocks/)). Это округление вниз, в пользу банка, чтобы не преувеличивать.
-- Калькулятор: ежемесячный взнос, сложный процент, 7 % годовых до комиссий. Это явно подписано как допущение, а не обещание. Вступительные сборы и комиссии брокера **не** учитываются, так что реальная разница скорее больше.
+- Americké ETF: [stockanalysis.com](https://stockanalysis.com/etf/) (TER, velikost fondu, burza NYSE Arca, uzávěrka 9. 10. 2026).
+- UCITS ETF: [justETF](https://www.justetf.com/cz/) (TER, velikost fondu, akumulační/distribuční).
+- Náhrady za VTI/SCHD: [investingintheweb.com](https://investingintheweb.com/blog/vti-europe-uk-alternatives/).
+- Srovnávací poplatek bankovního fondu 2 %: příklad Erste Top Stocks, TER 2,17 %, vstupní poplatek až 3 % ([finex.cz](https://finex.cz/fond/erste-top-stocks/)). Zaokrouhleno dolů, ve prospěch banky, abych nepřeháněl.
+- Kalkulačka: měsíční vklad, složené úročení, 7 % ročně před poplatky. Na stránce je to výslovně uvedeno jako předpoklad, ne slib. Vstupní poplatky a poplatky brokera **nejsou** započteny, takže skutečný rozdíl je spíš větší.
 
-QQQ сознательно не включён: он торгуется на Nasdaq, не на NYSE.
+QQQ jsem záměrně nezařadil: obchoduje se na Nasdaqu, ne na NYSE.
 
-## 6. Замер пути пользователя
+## 6. Měření cesty uživatele
 
-### Реальные пользователи: своя воронка + админка
-Задание не уточняет, где смотреть лиды, поэтому я сделал **собственную админку** `/admin.html` вместо внешней таблицы. Лиды и данные о пути лежат в одном месте, без лишних сервисов:
-- **лиды** хранятся в Redis: email, вариант, UTM, параметры калькулятора, время до заявки. Если запись не удалась, посетитель видит ошибку, лид не теряется молча;
-- **воронка**: страница отправляет анонимные счётчики шагов (`sendBeacon`, без cookies и персональных данных), каждый шаг не больше 1 раза за визит. Счётчик = число визитов, дошедших до шага, отдельно для A и B и по дням;
-- в админке видны KPI, воронка из 14 шагов с процентами от входа для A и B рядом, таблица по дням, лиды с поиском, выгрузка CSV (открывается в Excel) и удаление лида по запросу (GDPR).
+### Skuteční uživatelé: vlastní funnel + administrace
+Zadání neříká, kde se mají leady zobrazovat, proto jsem místo externí tabulky udělal **vlastní administraci** `/admin.html`. Leady i data o cestě jsou na jednom místě, bez dalších služeb:
+- **leady** jsou uložené v Redisu: e-mail, varianta, UTM, parametry kalkulačky, čas do odeslání. Když se zápis nepovede, návštěvník uvidí chybu a lead se tiše neztratí;
+- **funnel**: stránka posílá anonymní počítadla kroků (`sendBeacon`, bez cookies a osobních údajů), každý krok nejvýš jednou za návštěvu. Počítadlo = počet návštěv, které se ke kroku dostaly, zvlášť pro A a B a po dnech;
+- v administraci jsou KPI, funnel o 14 krocích s procenty od vstupu pro A a B vedle sebe, tabulka po dnech, leady s vyhledáváním, export CSV (otevře se v Excelu) a výmaz leadu na žádost (GDPR).
 
-Проверено на продакшене: настоящий браузер (эмуляция iPhone) отправил форму, лид появился в админке с корректными UTM и расчётом, воронка посчиталась по всем шагам, удаление сработало. Тестовые данные потом удалены.
+Ověřeno na produkci: skutečný prohlížeč (emulace iPhonu) odeslal formulář, lead se v administraci objevil se správnými UTM i výpočtem, funnel se započítal ve všech krocích a výmaz fungoval. Testovací data jsem pak smazal.
 
-### Дополнительно: PostHog (опционально)
-Каждый шаг отправляется как событие (`track()` в `app.js`) в PostHog EU в режиме **без cookies** (`persistence: 'memory'`). Поэтому не нужен cookie-баннер, который на мобиле съедает первый экран и сам по себе снижает конверсию. Ко всем событиям добавляются `variant` и `t_ms` (мс с момента загрузки).
-
-| Событие | Что значит |
+| Krok funnelu (událost) | Význam |
 |---|---|
-| `lp_view` (+ UTM) | вход на страницу |
-| `section_view:{hero,table,calc,form,faq}` | секция видна на ≥ 25 % |
-| `hero_cta`, `unlock_click`, `calc_cta`, `sticky_cta` | клики по CTA (какой CTA приводит к лиду) |
-| `calc_interact`, `calc_change` | вовлечение в калькулятор |
-| `scroll_depth:{25,50,75,100}` | глубина скролла |
-| `form_focus` → `form_submit` → `lead_success` / `form_error` / `lead_fail` | воронка формы и причины ошибок |
-| `page_leave` | уход: трогал ли калькулятор, фокусировал ли форму |
+| `lp_view` | vstup na stránku |
+| `hero_cta`, `unlock_click`, `calc_cta`, `sticky_cta` | kliky na CTA (které CTA vede k leadu) |
+| `section_view:{table,calc,form}` | sekce byla vidět aspoň z 25 % |
+| `calc_interact` | použití kalkulačky |
+| `form_focus` → `form_submit` → `lead_success` / `form_error` / `lead_fail` | funnel formuláře a důvody chyb |
 
-Воронка в PostHog: `lp_view → hero_cta → section_view:form → form_focus → lead_success`, с разбивкой по `variant`. В самом лиде сохраняются `variant`, UTM, параметры калькулятора и `time_to_lead_ms`.
+### Volitelně: PostHog
+Pro záznamy relací a podrobnější analytiku lze doplnit klíč PostHog EU do `public/config.js`. Běží **bez cookies** (`persistence: 'memory'`), takže není potřeba cookie lišta, která na mobilu zabere první obrazovku a sama o sobě snižuje konverzi. Navíc posílá hloubku scrollu (`scroll_depth`), každou změnu v kalkulačce (`calc_change`) a odchod ze stránky (`page_leave`). Základní funnel funguje i bez něj.
 
-### Лабораторный замер (`npm run measure`)
-Playwright: iPhone 13, «быстрое 4G» (150 мс RTT, 1,6 Мбит/с), CPU 4× медленнее. Скрипт проходит полный путь и сохраняет скриншоты каждого шага в `measure-output/`.
+### Laboratorní měření (`npm run measure`)
+Playwright: iPhone 13, „rychlé 4G“ (RTT 150 ms, 1,6 Mbit/s), CPU 4× pomalejší. Skript projde celou cestu a uloží snímek obrazovky každého kroku do `measure-output/`.
 
-| Шаг | Вариант A | Вариант B | Тапов |
+| Krok | Varianta A | Varianta B | Dotyků |
 |---|---|---|---|
-| FCP / LCP | 452 / 504 мс | 452 / 504 мс | — |
-| Объём загрузки | 36 КБ | 36 КБ | — |
-| Первый экран: H1 + CTA видны | ✓ | ✓ | 0 |
-| → результат калькулятора | 1,7 с | 1,7 с | 3 |
-| → форма | 2,6 с | 2,5 с | 4 |
-| → лид отправлен, контент разблокирован | 3,6 с | 3,5 с | 6 |
+| FCP / LCP (produkce) | 496 / 608 ms | 436 / 476 ms | — |
+| Objem přenosu (produkce, gzip) | 15 kB | 15 kB | — |
+| První obrazovka: H1 + CTA vidět | ✓ | ✓ | 0 |
+| → výsledek kalkulačky | 1,7 s | 1,7 s | 3 |
+| → formulář | 2,6 s | 2,5 s | 4 |
+| → lead odeslán, obsah odemčen | 3,6 s | 3,3 s | 6 |
 
-(Время скрипта, без чтения человеком. Главное здесь: путь требует **6 тапов**, ни одной новой страницы, одно поле ввода.)
+(Časy skriptu, bez čtení člověkem. Podstatné je, že cesta potřebuje **6 dotyků**, žádnou novou stránku a jedno vstupní pole.)
 
-## 7. Ожидаемая конверсия
+## 7. Očekávaná konverze
 
-Ориентиры из Unbounce Conversion Benchmark (Q4 2024): медиана финансовых услуг **8,3 %**, подкатегория *investing* всего **3,9 %**, paid social в финансах **9,3 %** ([unbounce.com/industry/finance](https://unbounce.com/industry/finance/)).
+Orientační hodnoty z Unbounce Conversion Benchmark (Q4 2024): medián finančních služeb **8,3 %**, podkategorie *investing* jen **3,9 %**, placené sociální sítě ve financích **9,3 %** ([unbounce.com/industry/finance](https://unbounce.com/industry/finance/)).
 
-**Мой прогноз: 6–9 % от визита до email** (рабочая цель 7 %). Почему выше медианы *investing*:
-- мы просим не открыть счёт или вложить деньги, а дать email за бесплатный инструмент, а это заметно меньший шаг;
-- одно поле, ценность видна до формы, контент выдаётся сразу;
-- точное совпадение объявления и первого экрана.
+**Můj odhad: 6–9 % z návštěvy na e-mail** (pracovní cíl 7 %). Proč nad mediánem *investing*:
+- nežádáme otevření účtu ani investici, jen e-mail za bezplatný nástroj, což je výrazně menší krok;
+- jedno pole, hodnota je vidět před formulářem, obsah se odemkne okamžitě;
+- přesná shoda reklamy a první obrazovky.
 
-Почему не выше: холодный трафик из соцсетей, финансовая тема (недоверие), часть аудитории получит ответ уже на первом экране и уйдёт. Это осознанная плата за честную ценность до формы.
+Proč ne víc: studený provoz ze sociálních sítí, finanční téma (nedůvěra), část lidí dostane odpověď už na první obrazovce a odejde. To je vědomá cena za poctivou hodnotu před formulářem.
 
-Ожидаемые промежуточные шаги, по которым диагностировать проблему: CTR hero-CTA 30–40 %, доля дошедших до формы 25–35 %, `form_focus → lead_success` ≥ 60 %.
+Očekávané mezikroky pro diagnostiku problémů: proklik hlavního CTA 30–40 %, podíl návštěv, které dojdou k formuláři, 25–35 %, `form_focus → lead_success` ≥ 60 %.
 
-## 8. Гипотезы для A/B-теста (по ожидаемому эффекту)
+## 8. Hypotézy pro A/B test (podle očekávaného efektu)
 
-1. **Поле email прямо в первом экране** (под обещанием) vs текущая кнопка со скроллом к форме. *Почему первое:* большинство уходит за секунды и до формы не доскролливает; одношаговая форма убирает целый шаг воронки. Ожидаю +20–40 % относительно. Риск: меньше вовлечения и «холоднее» лиды, поэтому смотреть и на открываемость первого письма.
-2. **Оффер A («VOO нельзя купить») vs B («316 000 Kč»)** как пара объявление + страница. Это уже встроено (`?v=a|b`). Сравнивать **стоимость лида (CPL)**, а не только конверсию страницы: B, вероятно, даст более широкий охват и дешёвый клик, A — более квалифицированных. Ожидаю разницу в CPL 15–30 %.
-3. **Сколько показывать бесплатно:** 1 открытая пара vs 2 (текущее) vs 4. Меньше открытого = больше любопытства, но и меньше доверия. Ожидаю ±10–15 %.
+1. **Pole pro e-mail přímo na první obrazovce** (pod slibem) vs. současné tlačítko se scrollem k formuláři. *Proč první:* většina lidí odejde během pár sekund a k formuláři nedoscrolluje; jednokrokový formulář odstraní celý krok funnelu. Očekávám +20–40 % relativně. Riziko: menší zapojení a „studenější“ leady, proto sledovat i otevíranost prvního e-mailu.
+2. **Nabídka A („VOO nekoupíte“) vs. B („316 000 Kč“)** jako dvojice reklama + stránka. Už je to zabudované (`?v=a|b`). Porovnávat **cenu za lead (CPL)**, ne jen konverzi stránky: B pravděpodobně přinese širší zásah a levnější klik, A kvalifikovanější lidi. Očekávám rozdíl v CPL 15–30 %.
+3. **Kolik ukázat zdarma:** 1 otevřená dvojice vs. 2 (současný stav) vs. 4. Méně otevřeného = víc zvědavosti, ale i méně důvěry. Očekávám ±10–15 %.
 
-Размер выборки: при базе 7 % и желании поймать +20 % относительно нужно ~5 700 визитов на вариант (α = 0,05, мощность 80 %). Поэтому гипотеза 1 первая: её эффект самый крупный, он виден на доступном бюджете.
+Velikost vzorku: při základu 7 % a cíli zachytit +20 % relativně je potřeba ~5 700 návštěv na variantu (α = 0,05, síla testu 80 %). Proto je hypotéza 1 první: má největší efekt a ten je vidět i s dostupným rozpočtem.
 
-## 9. Как я работал с ИИ (Claude Code)
+## 9. Jak jsem pracoval s AI (Claude Code)
 
-**Процесс.** Я работал в одной сессии Claude Code. Агенту давал задачи по шагам: «найди данные по ETF с источниками», «напиши страницу», «напиши скрипт замера», «исправь по скриншотам». Субагентов не использовал: задача небольшая и связная, контекст важнее параллельности.
+**Postup.** Pracoval jsem v jedné relaci Claude Code. Agentovi jsem zadával úkoly po krocích: „najdi data o ETF se zdroji“, „napiš stránku“, „napiš skript na měření“, „oprav podle screenshotů“, „zkontroluj řešení proti zadání“. Subagenty jsem nepoužil: úkol je malý a provázaný, kontext je důležitější než paralelní běh.
 
-**Инструкции агенту:**
-- сначала собрать данные, и только реальные: каждая цифра со ссылкой и датой, без «по памяти»;
-- mobile-first, один экран = одно действие, одно поле в форме;
-- тексты на чешском, без маркетинговых штампов и гарантий доходности;
-- после каждого изменения прогонять `measure.mjs` и **смотреть скриншоты**, а не верить коду.
+**Instrukce pro agenta:**
+- nejdřív sesbírat data, a jen skutečná: každé číslo s odkazem a datem, nic „z paměti“;
+- mobile-first, jedna obrazovka = jedna akce, jedno pole ve formuláři;
+- texty česky, bez marketingových frází a slibů výnosu;
+- po každé změně spustit `measure.mjs` a **podívat se na screenshoty**, ne věřit kódu.
 
-**Как проверял:**
-- цифры TER/AUM/ISIN сверял с открытыми страницами justETF/stockanalysis;
-- путь пользователя проверял скриптом Playwright на эмуляции iPhone и вручную по скриншотам каждого шага;
-- API проверял curl'ом (валидный email, невалидный email, honeypot, доступ к админке без пароля);
-- админку проверял сквозным тестом на продакшене: настоящий браузер отправляет форму → лид виден в админке → удаление кнопкой → тестовые данные удалены;
-- админку отдельно проверил на XSS: тестовый «email» с HTML-тегом в подменённых данных показан как текст.
-- чешские тексты вычитывал сам (я владею чешским).
+**Jak jsem výsledky ověřoval:**
+- čísla TER, velikosti fondů a ISIN jsem porovnal s veřejnými stránkami justETF/stockanalysis;
+- cestu uživatele jsem ověřil skriptem Playwright na emulaci iPhonu a ručně podle screenshotů každého kroku;
+- API jsem testoval přes curl (platný e-mail, neplatný e-mail, honeypot, přístup do administrace bez hesla);
+- administraci jsem ověřil end-to-end testem na produkci: skutečný prohlížeč odešle formulář → lead je vidět v administraci → výmaz tlačítkem → testovací data smazána;
+- administraci jsem zvlášť otestoval na XSS: testovací „e-mail“ s HTML značkou v podvržených datech se zobrazil jako text;
+- české texty jsem četl a upravoval sám (češtinu ovládám);
+- na konci jsem nechal agenta projít řešení bod po bodu proti zadání. Tak se našel nesplnitelný slib e-mailu (bod 12).
 
-**Где ИИ ошибся (и что я исправил):**
-1. **Фактическая ошибка в данных:** VT → VWCE был помечен «stejný index». На самом деле VT следует FTSE Global All Cap, а VWCE — FTSE All‑World (без small caps). Исправил на «podobný index» с пояснением.
-2. **Вводящее в заблуждение утверждение о налогах:** в FAQ агент написал, что ирландские фонды платят 15 % вместо 30 % удерживаемого налога. Для чешского инвестора с W‑8BEN это сравнение некорректно (и так 15 %). Удалил.
-3. **Налоговый лимит 40 млн Kč:** источники по изменениям 2026 года противоречат друг другу. Агент сам это отметил, и я не стал упоминать лимит, оставил только общеизвестный 3-летний časový test с оговоркой «ověřte u daňového poradce».
-4. **CTA вне первого экрана:** первая версия hero ставила кнопку ниже списка выгод. Скрипт показал `cta_above_fold: false` на iPhone 13. Перестроил hero.
-5. **Экран «спасибо» вне видимости:** после разблокировки таблица росла и выталкивала его за экран, и пользователь не видел результата. Видно было только на скриншоте. Добавил автоскролл.
-6. **Текст не соответствовал вёрстке:** «vlevo / vpravo» при вертикальных карточках на мобиле.
-7. **Ложное обещание:** «odhlásíte se jedním klikem», хотя в письме отписка ответом. Переформулировал.
-8. **Сбор данных:** страница Vanguard рендерится JS, и агент ничего не получил. Источник заменён на stockanalysis.com. PDF с KID банковского фонда тоже не прочитался, поэтому для комиссии банка взят finex.cz с пометкой «ověřte v KID».
-9. **Ложный «зелёный» тест:** после ужесточения проверки email сервер всё равно принял `<b>@x.cz`. Причина: локальный dev-сервер держал в памяти старую версию модуля. После перезапуска запрос отклоняется. Вывод: после правок перезапускать окружение, а не верить первому ответу.
-10. **Тест, который выглядел как баг:** счётчик воронки на проде «не считал» запрос из curl. Curl отправлял данные как form-urlencoded, а браузер (`sendBeacon`) шлёт `text/plain`. С правильным форматом и в сквозном браузерном тесте всё считается. Это была ошибка теста, а не кода, но её пришлось проверить, а не списать.
-11. **Мусор в репозитории:** при подключении Upstash Vercel CLI сам добавил в проект служебные файлы агента (`.agents/`, `skills-lock.json`). Заметил через `git status` и исключил из коммита.
+**Kde AI chybovala (a co jsem opravil):**
+1. **Věcná chyba v datech:** dvojice VT → VWCE byla označena „stejný index“. Ve skutečnosti VT sleduje FTSE Global All Cap a VWCE FTSE All‑World (bez nejmenších firem). Opraveno na „podobný index“ s vysvětlením.
+2. **Zavádějící tvrzení o daních:** agent napsal do FAQ, že irské fondy platí srážkovou daň 15 % místo 30 %. Pro českého investora s formulářem W‑8BEN je to srovnání nesprávné (i tak platí 15 %). Odstraněno.
+3. **Daňový limit 40 mil. Kč:** zdroje ke změnám od roku 2026 si odporují. Agent na to sám upozornil a limit jsem raději nezmiňoval. Zůstal jen obecně známý tříletý časový test s výhradou „ověřte u daňového poradce“.
+4. **CTA mimo první obrazovku:** první verze hero dala tlačítko pod seznam výhod. Skript ukázal `cta_above_fold: false` na iPhonu 13. Hero jsem přestavěl.
+5. **Poděkování mimo obrazovku:** po odemčení tabulka narostla a vytlačila poděkování z obrazovky, uživatel výsledek neviděl. Bylo to vidět jen na screenshotu. Doplněn automatický scroll.
+6. **Text neodpovídal rozvržení:** „vlevo / vpravo“, přitom karty jsou na mobilu pod sebou.
+7. **Nepravdivý slib:** „odhlásíte se jedním klikem“, i když se v e-mailu odhlašuje odpovědí. Přeformulováno.
+8. **Sběr dat:** stránka Vanguardu se vykresluje JavaScriptem a agent z ní nic nezískal. Zdroj nahrazen stockanalysis.com. Ani PDF s KID bankovního fondu se nepodařilo přečíst, proto je poplatek banky z finex.cz s poznámkou „ověřte v KID“.
+9. **Falešně „zelený“ test:** po zpřísnění kontroly e-mailu server stále přijal `<b>@x.cz`. Příčina: lokální dev server držel v paměti starou verzi modulu. Po restartu je požadavek odmítnut. Poučení: po úpravách restartovat prostředí, ne věřit první odpovědi.
+10. **Test, který vypadal jako chyba:** počítadlo funnelu na produkci „nezapočítalo“ požadavek z curl. Curl posílal data jako form-urlencoded, kdežto prohlížeč (`sendBeacon`) posílá `text/plain`. Se správným formátem i v end-to-end testu v prohlížeči se vše počítá. Byla to chyba testu, ne kódu, ale bylo nutné ji ověřit, ne odbýt.
+11. **Smetí v repozitáři:** při připojení Upstash přidal Vercel CLI do projektu pomocné soubory agenta (`.agents/`, `skills-lock.json`). Všiml jsem si toho přes `git status` a vyřadil je z commitu.
+12. **Nesplnitelný slib:** stránka slibovala „kopii na e-mail“, ale odesílání nebylo nastavené (chybí ověřená doména). Slib jsem odstranil a stránka teď slibuje jen okamžité odemčení (viz oddíl 2).
 
-## 10. Что не сделано и что нужно до запуска рекламы
+## 10. Proč chybí údaje provozovatele v `zasady.html`
 
-По приоритету:
-1. **Заполнить `zasady.html`**: оператор (имя/IČO/адрес). Без этого Meta/Google отклонят объявление.
-2. **Письмо с результатом**: задать `RESEND_API_KEY` + `MAIL_FROM` (верифицированный домен в Resend). Лиды уже сохраняются и видны в админке, но письмо пока не уходит, хотя на странице оно обещано.
-3. Пароль админки сменить на длинный случайный перед реальным трафиком (`vercel env`).
-4. (Опционально) PostHog key в `public/config.js` для записи сессий и детальной аналитики. Базовая воронка уже работает без него.
-5. **Пиксель / Conversions API Meta не подключены.** Без этого Meta не сможет оптимизировать кампанию на лиды. Рекомендую серверный CAPI из `api/lead.js`: не требует cookie-баннера.
-6. Юридическая проверка формулировки согласия (один клик без чекбокса = согласие на рассылку). Для MVP сознательный компромисс в пользу минимума полей.
-7. Своё доменное имя (ETFmapa.cz — рабочее название).
-8. Ручная проверка на реальном iPhone и Android в in-app браузерах Instagram/Facebook. Проверена только эмуляция.
-9. Данные ETF обновляются вручную (`data.js`); для долгой кампании стоит автоматизировать.
+Stránka se zásadami ochrany osobních údajů je hotová, jen místo správce (název, IČO, sídlo, kontakt) obsahuje zástupný text. **Teď to vyplnit nejde, a to záměrně:**
+- **Správcem osobních údajů je ten, kdo kampaň provozuje a leady využije**, tedy firma, pro kterou je stránka určena. To je obchodní rozhodnutí zadavatele, ne uchazeče o práci. U testového úkolu zatím žádný provozovatel neexistuje.
+- **Nemám vlastní IČO ani firmu**, pod kterou by kampaň běžela. Kdybych uvedl sebe jako fyzickou osobu, stal bych se podle GDPR správcem cizích leadů se všemi povinnostmi, a to by neodpovídalo skutečnosti.
+- **Vymyšlené údaje použít nelze.** Neplatná identifikace správce porušuje informační povinnost podle GDPR (čl. 13) i pravidla reklamních systémů a reklamu by to stejně zablokovalo.
+
+Doplnění zabere pár minut: stačí v `public/zasady.html` nahradit jeden řádek údaji provozovatele. Je to první bod v seznamu níže.
+
+## 11. Co není hotové a co je potřeba před spuštěním reklamy
+
+Podle priority:
+1. **Údaje provozovatele v `zasady.html`** (viz oddíl 10). Bez nich Meta/Google reklamu zamítnou.
+2. **Před skutečným provozem změnit heslo administrace** na dlouhé náhodné (`vercel env`).
+3. **Meta pixel / Conversions API nejsou připojené.** Bez nich Meta nemůže optimalizovat kampaň na leady (spustit ji ale jde, např. s optimalizací na zobrazení stránky). Doporučuji serverové CAPI z `api/lead.js`, které nepotřebuje cookie lištu.
+4. **E-mail s výsledkem** (volitelně): ověřit doménu v Resend, nastavit `RESEND_API_KEY` + `MAIL_FROM` a vrátit do textu slib e-mailu. Kód je připravený.
+5. (Volitelně) klíč PostHog v `public/config.js` pro záznamy relací. Základní funnel funguje i bez něj.
+6. Právní kontrola formulace souhlasu (odeslání bez zaškrtávacího políčka = souhlas se zasíláním tipů). Pro MVP vědomý kompromis ve prospěch minima polí.
+7. Vlastní doména (ETFmapa.cz je pracovní název).
+8. Ruční kontrola na skutečném iPhonu a Androidu v prohlížečích uvnitř Instagramu/Facebooku. Ověřena byla jen emulace.
+9. Data ETF se aktualizují ručně (`data.js`); pro dlouhou kampaň by stálo za to je automatizovat.
 
 ---
-*Не является инвестиционной рекомендацией.*
+*Nejde o investiční doporučení.*

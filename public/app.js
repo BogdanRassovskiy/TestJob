@@ -85,7 +85,6 @@
     out('fvEtf', czk.format(round1k(etf)));
     out('diff', czk.format(diff));
     out('paid', czk.format(calc.monthly * calc.years * 12));
-    out('summary', czk.format(calc.monthly) + ' měsíčně, ' + calc.years + ' let = rozdíl ' + czk.format(diff));
     return diff;
   }
   function out(key, val) { $$('[data-out="' + key + '"]').forEach(function (el) { el.textContent = val; }); }
@@ -189,7 +188,7 @@
       track('lead_fail', { error: String(x) });
       showErr('Nepodařilo se odeslat. Zkuste to prosím za chvíli znovu.');
       btn.disabled = false;
-      btn.textContent = 'Odemknout a poslat na e-mail';
+      btn.textContent = 'Odemknout zdarma';
     });
   });
 
