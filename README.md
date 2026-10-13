@@ -188,6 +188,7 @@ Velikost vzorku: při základu 7 % a cíli zachytit +20 % relativně je potřeba
 11. **Smetí v repozitáři:** při připojení Upstash přidal Vercel CLI do projektu pomocné soubory agenta (`.agents/`, `skills-lock.json`). Všiml jsem si toho přes `git status` a vyřadil je z commitu.
 12. **Nesplnitelný slib:** stránka slibovala „kopii na e-mail“, ale odesílání nebylo nastavené (chybí ověřená doména). Slib jsem odstranil a stránka teď slibuje jen okamžité odemčení (viz oddíl 2).
 13. **Styly se navzájem ovlivnily:** nové rozbalovací řádky srovnání (`<details>`) převzaly styl z FAQ, takže se v nich objevilo „+“ navíc a dvojité odsazení. Kód vypadal v pořádku, chyba byla vidět jen na screenshotu. Styly FAQ jsem omezil na sekci `.faq`.
+14. **Stará verze v prohlížeči:** agent nastavil JS a CSS cache na hodinu. Po nasazení změny tak telefon načetl novou stránku, ale starý `config.js`: hlavní tlačítko mělo starý text a vedlo jinam. Při kampani by to každá úprava zopakovala. Cache je teď `max-age=0, must-revalidate` a soubory mají v odkazu verzi (`?v=3`).
 
 ## 10. Proč chybí údaje provozovatele v `zasady.html`
 
